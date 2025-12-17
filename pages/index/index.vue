@@ -7,7 +7,8 @@
 	<view>
 		<swiper :indicator-dots="true" :autoplay="true" :interval="3000" :duration="1000">
 			<swiper-item   v-for="(item,index) in swiper_list" :key="item.id" >
-				 <image mode="scaleToFill" :src="item.url" style="width: 100%;height: 100%;"></image>
+				<image mode="scaleToFill" :src="item.url" style="width: 100%;height: 100%;" v-if="item.type == 'image'" ></image>
+				<video :src="item.url" style="width: 100%;height: 100%;" v-if="item.type == 'video'"></video>
 			</swiper-item>
 		</swiper>
 	</view>
@@ -51,11 +52,11 @@ let swiper_list = ref([
 		type: 'image',
 		url: '/static/888.png'
 	},
-	// {
-	// 	id: 8,
-	// 	type: 'video',
-	// 	url: 'https://vjs.zencdn.net/v/oceans.mp4'  //在线视频链接
-	// },
+	{
+		id: 8,
+		type: 'video',
+		url: 'https://vjs.zencdn.net/v/oceans.mp4'  //在线视频链接
+	},
 ])
 
 // onMounted生命周期
