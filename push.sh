@@ -177,9 +177,11 @@ main() {
     check_and_add_remote $REMOTE_GITEE_NAME $REMOTE_GITEE_URL
     check_and_add_remote $REMOTE_GITHUB_NAME $REMOTE_GITHUB_URL
 
-    # 3. 拉取最新代码(第一次上传代码的时候，需要注释该代码。后续解开注释即可)
+    # 3. 拉取最新代码
     info "[3/5] 同步最新代码..."
-    # pull_latest_code
+	
+	# pull_latest_code  #第一次上传代码的时候，需要注释该代码。后续解开注释即可
+    pull_latest_code
     
     # 4. 提交并推送变更
     info "[4/5] 提交并推送代码..."
