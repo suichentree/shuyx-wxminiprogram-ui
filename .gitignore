@@ -1,0 +1,40 @@
+# 忽略 node_modules 和 miniprogram_npm 文件夹
+node_modules/
+miniprogram_npm/
+# 忽略微信开发者工具生成的配置文件
+project.config.json
+project.private.config.json
+# 忽略日志文件
+*.log
+# 忽略 IDE 配置文件
+vscode/
+idea/
+# 忽略编译输出
+dist/
+build/
+# 忽略临时文件
+DS_Store
+Thumbs.db
+
+
+# 忽略以下文件和目录
+node_modules/
+dist/
+dev/
+DS_Store
+# 忽略UniApp编译生成的小程序相关目录
+unpackage/
+# 忽略本地配置文件（请根据实际情况修改）
+manifest.local.json
+# 忽略编辑器自动生成的文件
+idea/
+vscode/
+# 忽略日志文件
+logs/
+# 忽略临时文件
+temp/
+# 忽略构建工具自动生成的文件
+build/
+# 忽略npm安装的包文件
+package-lock.json
+yarn.lock
