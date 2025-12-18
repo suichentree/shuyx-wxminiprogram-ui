@@ -20,10 +20,34 @@
 		}
 	],
 	"globalStyle": {
-		"navigationBarTextStyle": "black",
-		"navigationBarTitleText": "uni-app",
-		"navigationBarBackgroundColor": "#F8F8F8",
-		"backgroundColor": "#F8F8F8"
+		"navigationBarTextStyle": "black",     //导航栏标题颜色及状态栏前景颜色
+		"navigationBarTitleText": "Shuyx Lab",			//导航栏标题文字内容
+		"navigationBarBackgroundColor": "#FFC125",  //导航栏背景颜色（同状态栏背景色）
+		"backgroundColor": "#F8F8F8"				//下拉显示出来的窗口的背景色
 	},
-	"uniIdRouter": {}
+	"uniIdRouter": {},
+	"tabBar": {
+		"color": "#7A7E83",
+		"selectedColor": "#3cc51f",
+		"borderStyle": "black",
+		"backgroundColor": "#ffffff",
+		"list": [
+			{
+				"pagePath": "pages/index/index",
+				"iconPath": "/static/tab_bar_img/home.png",
+				"selectedIconPath": "/static/tab_bar_img/home_active.png",
+				"text": "首页"
+			}, {
+				"pagePath": "pages/exam/exam",
+				"iconPath": "/static/tab_bar_img/component.png",
+				"selectedIconPath": "/static/tab_bar_img/component_cur.png",
+				"text": "测试"
+			}, {
+				"pagePath": "pages/me/me",
+				"iconPath": "/static/tab_bar_img/me.png",
+				"selectedIconPath": "/static/tab_bar_img/me_active.png",
+				"text": "我的"
+			},
+		]
+	}
 }
