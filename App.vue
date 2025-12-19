@@ -8,10 +8,20 @@
 		},
 		onHide: function() {
 			console.log('App Hide')
+		},
+		//全局变量
+		globalData: {
+			//小程序版本号
+			version:"v2.1.1",
+			//用户相关信息
+			userInfo: null,
+			openId:null,
+			unionId:null,
+			token:null,
 		}
 	}
 </script>
 
 <style>
-	/*每个页面公共css */
+	/*此处定义的是全局样式*/
 </style>

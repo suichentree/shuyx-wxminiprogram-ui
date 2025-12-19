@@ -5,7 +5,7 @@
 	</view>
 	<!-- 轮播图 -->
 	<view>
-		<swiper :indicator-dots="true" :autoplay="true" :interval="3000" :duration="1000" style="height: 225px;">
+		<swiper :indicator-dots="true" :autoplay="true" :interval="3000" :duration="1000" style="height: 200px;">
 			<swiper-item   v-for="(item,index) in swiper_list" :key="item.id" >
 				<image mode="scaleToFill" :src="item.url" style="width: 100%;height: 100%;" v-if="item.type == 'image'" ></image>
 				<video :src="item.url" style="width: 100%;height: 100%;" v-if="item.type == 'video'"></video>
