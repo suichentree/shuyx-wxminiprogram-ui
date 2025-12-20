@@ -24,4 +24,7 @@
 
 <style>
 	/*此处定义的是全局样式*/
+	page {
+		background-color: whitesmoke;   /* 页面背景色 */
+	}
 </style>

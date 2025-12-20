@@ -20,7 +20,7 @@
 	<view style="border-bottom: 1px gainsboro solid;">
 		<uni-section title="学习手册" type="line" titleFontSize="25px"></uni-section>
 	</view>
-	<view style="padding:10px">
+	<view style="padding:10px;background-color: white;">
 		<uni-grid :column="3" :highlight="true" :show-border="false">
 			<uni-grid-item >
 				<view class="grid-item-box" >
@@ -52,7 +52,7 @@
 	<view style="border-bottom: 1px gainsboro solid;">
 		<uni-section title="其他" type="line" titleFontSize="25px"></uni-section>
 	</view>
-	<view>
+	<view style="background-color: white;">
 		<view style="position:relative;padding: 10px;">
 			<image mode="scaleToFill" src="/static/111.png" style="width: 100%;height:150px;border-radius: 5%;"></image>
 			<view style="position: absolute;top:100px;left:20px;color:white;font-size: 25px;">我的博客</view>
