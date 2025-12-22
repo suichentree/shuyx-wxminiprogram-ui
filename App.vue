@@ -12,11 +12,14 @@
 		//全局变量
 		globalData: {
 			//小程序版本号
-			version:"v2.1.1",
+			version:"v2.0.1",
 			//用户相关信息
-			userInfo: null,
-			openId:null,
-			unionId:null,
+			userInfo: {
+				id:undefined,
+				name:undefined,
+				wx_wx_openid:undefined,
+				is_admin:undefined,
+			},
 			token:null,
 		}
 	}

@@ -17,6 +17,12 @@
 			"style": {
 				"navigationBarTitleText": "测试"
 			}
+		},
+		{
+			"path": "pages/userinfo/userinfo",
+			"style": {
+				"navigationBarTitleText": "个人信息"
+			}
 		}
 	],
 	"globalStyle": {
