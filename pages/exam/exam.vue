@@ -1,21 +1,21 @@
 <template>
-	<view>
-		<scroll-view :scroll-top="scrollTop" scroll-y="true" class="scroll-Y" @scrolltoupper="upper"
-			@scrolltolower="lower" @scroll="scroll">
-			<uni-list>
-				<uni-list-item>
-					<template v-slot:header>
-						<view class="slot-box">
-							<image class="slot-image" src="/static/logo.png" mode="widthFix" style="width: 100px;"></image>
-						</view>
-					</template>
-					<template v-slot:footer>
-						<text class="slot-box slot-text">自定义两侧插槽</text>
-					</template>
-				</uni-list-item>
-			</uni-list>
-		</scroll-view>
-	</view>
+	<scroll-view :scroll-top="scrollTop" scroll-y="true" class="scroll-Y" @scrolltoupper="upper"
+		@scrolltolower="lower" @scroll="scroll">
+		<view style="display: flex;flex-direction: column;">
+			<view style="display: flex;flex-direction: row;justify-content: start;align-items: center;background-color: white;margin: 10px;">
+				<image src="/static/111.png" mode="aspectFill" style="height:100px;width:150px;border-radius: 5%;"></image>
+				<view style="padding: 5px;color:black;font-weight: 1000;">
+					<text>SSS 面试题</text>
+				</view>
+			</view>
+			<view style="display: flex;flex-direction: row;justify-content: start;align-items: center;background-color: white;margin: 10px;">
+					<image src="/static/111.png" mode="aspectFill" style="height:100px;width:150px;border-radius: 5%;"></image>
+				<view>
+					<text>自定义两侧插槽</text>
+				</view>
+			</view>
+		</view>
+	</scroll-view>
 </template>
 
 <script setup>
@@ -49,6 +49,6 @@ function scroll(e){
 
 </script>
 
-<style>
+<style scoped>
 	       
 </style>
