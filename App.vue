@@ -14,12 +14,9 @@
 			//小程序版本号
 			version:"v2.0.1",
 			//用户相关信息
-			userInfo: {
-				id:undefined,
-				name:undefined,
-				wx_wx_openid:undefined,
-				is_admin:undefined,
-			},
+			userId:undefined,
+			userName:undefined,
+			userInfo: {},
 			token:null,
 		}
 	}

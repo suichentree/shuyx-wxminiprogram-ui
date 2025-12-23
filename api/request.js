@@ -53,22 +53,12 @@ const request = (obj) => {
 			},
 			fail(error) {
 				// 请求失败后的逻辑
-				console.log(err)
-
+				console.log("请求失败:",error)
 				uni.showToast({
-					title: '未知异常,请求失败',
+					title: '请求失败',
 					icon: "error",
 					duration: 2000
 				})
-				//放行
-				reject(error)
-			},
-			complete() {
-				// 不管成功还是失败都会执行
-
-				//隐藏加载框和消息提示框
-				uni.hideLoading();
-				uni.hideToast();
 			}
 		})
 	}).catch(() => {});

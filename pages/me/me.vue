@@ -23,7 +23,7 @@
 	<!-- 列表 -->
 	<view style="padding:26px 16px;">
 		<uni-list >
-			<uni-list-item title="微信登录" :show-extra-icon="true" :extra-icon="{color: 'red',size: '25',type: 'star'} ">
+			<uni-list-item title="微信登录" :show-extra-icon="true" :extra-icon="{color: 'red',size: '25',type: 'star-filled'} ">
 				<template v-slot:footer>
 					<button type="primary" size="mini" v-if=" userInfo.id == undefined " @click="wxLogin" style="background-image: linear-gradient(45deg, #39b54a, #8dc63f);box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);">点击登录</button>
 					<button type="primary" size="mini" v-else style="background-image: linear-gradient(45deg, #39b54a, #8dc63f);box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);">已登录</button>
@@ -34,7 +34,7 @@
 			<uni-list-item title="测试记录" :show-extra-icon="true" :extra-icon="{color: 'gray',size: '25',type: 'wallet'} " showArrow/>
 			<uni-list-item title="意见反馈" :show-extra-icon="true" :extra-icon="{color: 'purple',size: '25',type: 'compose'} " showArrow/>
 			<uni-list-item title="二维码" :show-extra-icon="true" :extra-icon="{color: '#009300',size: '25',type: 'pyq'} " showArrow/>
-			<uni-list-item title="设置" :show-extra-icon="true" :extra-icon="{color: '#000000',size: '25',type: 'gear-filled'} " showArrow/>
+			<uni-list-item title="设置" :show-extra-icon="true" :extra-icon="{color: '#000000',size: '25',type: 'gear'} " showArrow/>
 			<uni-list-item title="版本号" :show-extra-icon="true" :extra-icon="{color: '#bf0000',size: '25',type: 'info'} " :rightText="version_text"/>
 		</uni-list>
 	</view>
@@ -91,10 +91,14 @@ function wxLogin(){
 					
 					//设置全局变量
 					getApp().globalData.userInfo = res.data.userInfo;
+					getApp().globalData.userId = res.data.userInfo.id;
+					getApp().globalData.userName = res.data.userInfo.name;
 					
-					uni.navigateTo({
-						url: '/pages/userinfo/userinfo?userId='+res.data.userInfo.id
+					//刷新页面
+					uni.reLaunch({
+					    url: '/pages/me/me'
 					})
+					
 				}else{
 					//是第一次登录，需要跳转到个人信息页面。补全个人信息
 					uni.navigateTo({
