@@ -23,6 +23,12 @@
 			"style": {
 				"navigationBarTitleText": "个人信息"
 			}
+		},
+		{
+			"path": "pages/exam/aq/aq",
+			"style": {
+				"navigationBarTitleText": "答题"
+			}
 		}
 	],
 	"globalStyle": {

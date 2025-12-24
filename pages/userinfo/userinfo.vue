@@ -19,7 +19,7 @@
 					</picker>
 				</template>
 			</uni-list-item>
-			<uni-list-item title="年龄" :show-extra-icon="true" :extra-icon="{color: 'purple',size: '25',type: 'compose'}" showArrow>
+			<uni-list-item title="年龄"  clickable  :show-extra-icon="true" :extra-icon="{color: 'purple',size: '25',type: 'compose'}" showArrow>
 				<template v-slot:footer>
 					<picker mode="selector" :value="age_index" :range="ageArray" @change="bindAgeChange">
 						<view class="uni-input">{{ageArray[age_index]}}</view>
@@ -92,6 +92,8 @@ onMounted(() => {
 		address_value.value[0] = address_arrays[0];
 		address_value.value[1] = address_arrays[1];
 		address_value.value[2] = address_arrays[2];
+	}else{
+		
 	}
 	
 })
