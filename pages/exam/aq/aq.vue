@@ -13,6 +13,7 @@
 			</view>
 		</view>
 	</view>
+	<uni-section class="mb-10" title="基础用法" sub-title="副标题"></uni-section>
 </template>
 
 <script setup>
