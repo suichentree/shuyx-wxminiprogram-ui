@@ -25,9 +25,9 @@
 			}
 		},
 		{
-			"path": "pages/exam/aq/aq",
+			"path": "pages/exam/practice/practice",
 			"style": {
-				"navigationBarTitleText": "答题"
+				"navigationBarTitleText": "练习"
 			}
 		}
 	],

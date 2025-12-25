@@ -42,7 +42,7 @@
 
 <script setup>
 import { ref,watch, onMounted, provide } from 'vue'
-import UserAPIService from '../../api/user.service.js'
+import UserAPIService from '@/api/user.service.js'
 
 
 // 用户默认头像

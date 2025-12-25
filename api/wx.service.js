@@ -3,9 +3,9 @@ import request from './request.js'
 
 // 创建资源访问对象
 const APIResources = {
-	getOpenIdByWxCode (params) {
+	wxUserLogin (params) {
 		return request({
-			url: '/mp/wxservice/getOpenIdByWxCode',
+			url: '/mp/user/wxUserLogin',
 			method: 'POST',
 			data: params,
 	        header: {"Content-Type":"application/json;charset=UTF-8"} 

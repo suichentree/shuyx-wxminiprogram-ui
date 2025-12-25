@@ -3,9 +3,17 @@ import request from './request.js'
 
 // 创建资源访问对象
 const APIResources = {
-	wxUserLogin (params) {
+	getExamList (params) {
 		return request({
-			url: '/mp/user/wxUserLogin',
+			url: '/mp/exam/getExamList',
+			method: 'GET',
+			data: params,
+	        header: {"Content-Type":"application/x-www-form-urlencoded"} 
+		})
+	},
+	getQuestionList (params) {
+		return request({
+			url: '/mp/exam/getQuestionList',
 			method: 'POST',
 			data: params,
 	        header: {"Content-Type":"application/json;charset=UTF-8"} 
