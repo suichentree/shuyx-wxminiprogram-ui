@@ -1,6 +1,5 @@
 <template>
-	<scroll-view :scroll-top="scrollTop" scroll-y="true" class="scroll-Y" @scrolltoupper="upper"
-		@scrolltolower="lower" @scroll="scroll">
+	<scroll-view>
 		<view v-for="(item,index) in examList" style="display: flex;flex-direction: column;">
 			<view style="display:flex;flex-direction:row;background-color: white;margin: 10px;">
 				<view style="flex:1;display: flex;">
@@ -60,19 +59,6 @@ onMounted(() => {
 	}
 })	
 
-let scrollTop = ref(0)
-
-			
-function upper(e){
-	console.log(e)
-}		
-function lower(e){
-	console.log(e)
-}	
-function scroll(e){
-	console.log(e)
-	this.old.scrollTop = e.detail.scrollTop
-}
 
 function getExamList(){
 	let params = {page_num:1,page_size:10}

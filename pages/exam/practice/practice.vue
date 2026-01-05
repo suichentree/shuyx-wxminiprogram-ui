@@ -10,22 +10,20 @@
 						</view>
 				</view>
 				<view v-if="item.question.type == 1">
-					<!-- 单选题 -->
-					<uni-data-checkbox mode="list" :map="{text:'content',value:'id'}" :localdata="item.options"  v-model="r1" ></uni-data-checkbox>
+					<!-- 单选 -->
+					<uni-data-checkbox mode="list" :map="{text:'content',value:'id'}" :localdata="item.options" @change="(e)=>{ handleCheckboxChange(e,item.question.id) }"></uni-data-checkbox>
 				</view>
 				<view v-else-if="item.question.type == 2">
-					<!-- 多选题 -->
-					<uni-data-checkbox mode="list" :map="{text:'content',value:'id'}" multiple  :localdata="item.options" v-model="r2" @change="change"></uni-data-checkbox>
+					<!-- 多选 -->
+					<uni-data-checkbox mode="list" :map="{text:'content',value:'id'}" multiple  :localdata="item.options" @change="(e)=>{ handleCheckboxChange(e,item.question.id) }"></uni-data-checkbox>
 				</view>
 			</view>
 		</scroll-view>
-		<!-- 占位区域，防止底部区域遮挡题目 -->
-		<view style="height: 50px;"></view>
-		<!-- 底部区域 -->
-		<view class="footer">
-			<button style="flex: 1;" @click="openAnswerCard">答题卡</button>
-			<button style="flex:3;" @click="toSubmit">交卷</button>
-		</view>
+	</view>
+	<!-- 底部区域 -->
+	<view class="footer">
+		<button style="flex: 1;" @click="openAnswerCard">答题卡</button>
+		<button style="flex:3;" @click="toSubmit">交卷</button>
 	</view>
 	
 	<!-- 答题卡弹窗 -->
@@ -68,17 +66,8 @@ onMounted(()=>{
 		
 
 // 问题选项列表
-let question_option_List = ref([
-	{
-		question:{},
-		options:[]
-	}
-])
-
-let r1 = {}
-let r2 = []
-
-
+let question_option_List = ref([])
+//获取题目列表信息
 function getQuestionList(){
 	let params = {exam_id:examId.value}
 	ExamAPIService.getQuestionList(params).then((res) => {
@@ -89,18 +78,30 @@ function getQuestionList(){
 	})
 }
 
-function toSubmit(){
-	console.log(r1.value)
-	console.log(r2.value)
+//用户题目选项键值对（键：question_id，值：选中的option_id数组）
+let userAnswerMap = ref({})
+//选项改变时
+function handleCheckboxChange(e,question_id){
+	console.log(e.detail.value)
+	console.log(question_id)
+	//将已选的题目id-已选的选项ID,进行关联存储
+	userAnswerMap.value[question_id] = e.detail.value
 }
 
+//交卷
+function toSubmit(){
+	console.log(userAnswerMap.value)
+	
+}
 
+//打卡答题卡
 let type = ref("center")
 let answerCardPopup = ref(null)
 function openAnswerCard() {
   answerCardPopup.value?.open();
 }
 
+//答题卡跳转题目
 let currentIndex = ref(0)
 const jumpToQuestion = (idx) => {
   var anchor = document.getElementById(idx);
@@ -109,10 +110,10 @@ const jumpToQuestion = (idx) => {
 
 </script>
 <style scoped>
-page-container {
+.page-container {
 	display: flex;
 	flex-direction: column;
-	height: 100vh;
+	height: 90vh;
 }
 
 .content {
