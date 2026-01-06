@@ -3,6 +3,7 @@ import request from './request.js'
 
 // 创建资源访问对象
 const APIResources = {
+	//获取测试列表
 	getExamList (params) {
 		return request({
 			url: '/mp/exam/getExamList',
@@ -11,12 +12,22 @@ const APIResources = {
 	        header: {"Content-Type":"application/x-www-form-urlencoded"} 
 		})
 	},
+	//获取问题列表
 	getQuestionList (params) {
 		return request({
 			url: '/mp/exam/getQuestionList',
 			method: 'POST',
 			data: params,
 	        header: {"Content-Type":"application/json;charset=UTF-8"} 
+		})
+	},
+	//交卷
+	submitAnswerMap(params){
+		return request({
+			url: '/mp/exam/submitAnswerMap',
+			method: 'POST',
+			data: params,
+		    header: {"Content-Type":"application/json;charset=UTF-8"} 
 		})
 	}
 }

@@ -3,7 +3,7 @@
 		<scroll-view class="content" scroll-y="true">
 			<view class="content-item" v-for="(item,index) in question_option_List" :key="item">
 				<view :id="index+1" style="display: flex;flex-direction: row;gap: 5px;">
-						<view ><uni-tag :text="index+1" type="primary" size="mini" /></view>
+						<view><uni-tag :text="index+1+''" type="primary" size="mini" /></view>
 						<view style="font-size: 14px;color: rgb(51, 51, 51);">
 							<text>{{item.question.name}}</text>
 							<view style="font-size: 12px;color:gray;">{{item.question.type_name}}</view>
@@ -34,12 +34,12 @@
 		</view>
 		<view class="card-list">
 		  <view class="card-item"
-			:class="{ answered: question.selectedOptionId }"
-			v-for="(question, idx) in question_option_List"
-			:key="question.id"
-			@click="jumpToQuestion(idx + 1)"
+			v-for="(item,index) in question_option_List"
+			:key="item.question.id"
+			@click="jumpToQuestion(index + 1)"
+			:class="{answered: isAnswerd(item.question.id) }"
 		  >
-			<text class="card-num">{{ idx + 1 }}</text>
+			<text class="card-num">{{ index + 1 }}</text>
 		  </view>
 		</view>
 	  </view>
@@ -78,7 +78,8 @@ function getQuestionList(){
 	})
 }
 
-//用户题目选项键值对（键：question_id，值：选中的option_id数组）
+//用户题目选项键值对（键：question_id，值：选中的option_id，单选是数字，多选是数组）
+//例如 {4: 17, 6: 25, 8: 32,11:[46,45]}
 let userAnswerMap = ref({})
 //选项改变时
 function handleCheckboxChange(e,question_id){
@@ -88,13 +89,7 @@ function handleCheckboxChange(e,question_id){
 	userAnswerMap.value[question_id] = e.detail.value
 }
 
-//交卷
-function toSubmit(){
-	console.log(userAnswerMap.value)
-	
-}
-
-//打卡答题卡
+//打开答题卡
 let type = ref("center")
 let answerCardPopup = ref(null)
 function openAnswerCard() {
@@ -107,6 +102,21 @@ const jumpToQuestion = (idx) => {
   var anchor = document.getElementById(idx);
   anchor.scrollIntoView();
 };
+
+//答题卡中题目是否已经作答
+function isAnswerd(qid){
+	return userAnswerMap.value.hasOwnProperty(qid)
+}
+
+//交卷
+function toSubmit(){
+	console.log(userAnswerMap.value)
+	let params = {exam_id:examId.value,answer_map:userAnswerMap.value}
+	ExamAPIService.submitAnswerMap(params).then((res) => {
+		console.log(res)
+		
+	})
+}
 
 </script>
 <style scoped>
@@ -168,11 +178,11 @@ const jumpToQuestion = (idx) => {
 	background-color: #f5f5f5;
 	font-size: 32rpx;
 	color: #333;
-	&.answered {
-	  background-color: #e6f7ff;
-	  color: #1890ff;
-	  border: 2rpx solid #1890ff;
-	}
+	
+}
+.answered {
+  background-color: #e6f7ff;
+  color: #1890ff;
 }
 </style>
   
