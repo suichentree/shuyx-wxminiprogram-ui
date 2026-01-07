@@ -17,10 +17,6 @@
 					<!-- 多选 -->
 					<uni-data-checkbox mode="list" :map="{text:'content',value:'id'}" multiple  :localdata="item.options" @change="(e)=>{ handleCheckboxChange(e,item.question.id) }"></uni-data-checkbox>
 				</view>
-				<!-- 题目分析页面 -->
-				<view>
-					
-				</view>
 			</view>
 		</scroll-view>
 	</view>
@@ -82,6 +78,17 @@ function getQuestionList(){
 	})
 }
 
+//用户题目选项键值对（键：question_id，值：选中的option_id，单选是数字，多选是数组）
+//例如 {4: 17, 6: 25, 8: 32,11:[46,45]}
+let userAnswerMap = ref({})
+//选项改变时
+function handleCheckboxChange(e,question_id){
+	console.log(e.detail.value)
+	console.log(question_id)
+	//将已选的题目id-已选的选项ID,进行关联存储
+	userAnswerMap.value[question_id] = e.detail.value
+}
+
 //打开答题卡
 let type = ref("center")
 let answerCardPopup = ref(null)
@@ -96,27 +103,10 @@ const jumpToQuestion = (idx) => {
   anchor.scrollIntoView();
 };
 
-
-//用户题目选项键值对（键：question_id，值：选中的option_id，单选是数字，多选是数组）
-//例如 {4: 17, 6: 25, 8: 32,11:[46,45]}
-let userAnswerMap = ref({})
-//选项改变时
-function handleCheckboxChange(e,question_id){
-	console.log("qid = "+question_id,"optionid = "+e.detail.value)
-	//将已选的题目id-已选的选项ID,进行关联存储
-	userAnswerMap.value[question_id] = e.detail.value
-}
-
-//判断题目是否已经作答
+//答题卡中题目是否已经作答
 function isAnswerd(qid){
 	return userAnswerMap.value.hasOwnProperty(qid)
 }
-
-//判读题目是否答对
-function isAnswerRight(qid,){
-	
-}
-
 
 //交卷
 function toSubmit(){

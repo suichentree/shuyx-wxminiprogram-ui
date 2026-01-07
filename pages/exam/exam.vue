@@ -5,13 +5,16 @@
 				<view style="flex:1;display: flex;">
 					<img src="/static/111.png" style="width:100%;height:auto;border-radius: 5px;"/>
 				</view>
-				<view style="flex:1;display:flex;flex-direction: column;gap:5px;padding: 10px;" @click="toExam(item.id)">
+				<view style="flex:1;display:flex;flex-direction: column;gap:5px;padding: 10px;">
 					<h3>{{item.name}}</h3>
 					<view style="display: flex;gap: 5px;">
 						<uni-tag :text="item.type" type="primary" size="small"/>
 					</view>
-					<view style="background-color: lightblue;">
-						<text>开始练习</text><uni-icons type="redo-filled"></uni-icons>
+					<view style="background-color: lightblue;" @click="toPractice(item.id)">
+						<text>顺序练习</text><uni-icons type="redo-filled"></uni-icons>
+					</view>
+					<view style="background-color: lightblue;" @click="toKaoshi(item.id)">
+						<text>模拟考试</text><uni-icons type="redo-filled"></uni-icons>
 					</view>
 				</view>
 			</view>
@@ -70,14 +73,21 @@ function getExamList(){
 	})
 }
 
-function toExam(id){
+//进行顺序练习
+function toPractice(id){
 	console.log(id)
 	uni.navigateTo({
-		url: '/pages/exam/practice/practice?examId='+id
+		url: '/pages/exam/practice/practiceInfo?examId='+id
 	})
 }
 
-
+//进行模拟考试
+function toKaoshi(id){
+	console.log(id)
+	uni.navigateTo({
+		url: '/pages/exam/kaoshi/kaoshiInfo?examId='+id
+	})
+}
 
 </script>
 
