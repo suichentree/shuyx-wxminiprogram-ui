@@ -49,7 +49,7 @@
 
 <script setup>
 import { onMounted, ref } from 'vue';
-import ExamAPIService from '@/api/exam.service.js'
+import KaoshiAPIService from '@/api/kaoshi.service.js'
 import { onLoad } from "@dcloudio/uni-app";
 
 //测试id
@@ -61,16 +61,16 @@ onLoad((option) => {
 });
 
 onMounted(()=>{
-	getQuestionList()
+	start()
 })
 		
 
 // 问题选项列表
 let question_option_List = ref([])
-//获取题目列表信息
-function getQuestionList(){
-	let params = {exam_id:examId.value}
-	ExamAPIService.getQuestionList(params).then((res) => {
+//获取题目列表信息和用户测试记录信息
+function start(){
+	let params = {user_id:999,exam_id:examId.value}
+	KaoshiAPIService.start(params).then((res) => {
 		console.log(res)
 		if (res.code == 200) {
 			question_option_List.value = res.data
@@ -112,7 +112,7 @@ function isAnswerd(qid){
 function toSubmit(){
 	console.log(userAnswerMap.value)
 	let params = {exam_id:examId.value,answer_map:userAnswerMap.value}
-	ExamAPIService.submitAnswerMap(params).then((res) => {
+	KaoshiAPIService.submitAnswerMap(params).then((res) => {
 		console.log(res)
 		
 	})

@@ -3,34 +3,24 @@ import request from './request.js'
 
 // 创建资源访问对象
 const APIResources = {
-	//获取测试列表
-	getExamList (params) {
+	//开始/继续模拟考试 
+	start(params) {
 		return request({
-			url: '/mp/exam/getExamList',
-			method: 'GET',
-			data: params,
-	        header: {"Content-Type":"application/x-www-form-urlencoded"} 
-		})
-	},
-	//获取问题列表
-	getKaoshiQuestionList (params) {
-		return request({
-			url: '/mp/exam/kaoshi/getQuestionList',
+			url: '/mp/exam/kaoshi/start',
 			method: 'POST',
 			data: params,
 	        header: {"Content-Type":"application/json;charset=UTF-8"} 
 		})
 	},
 	//获取模拟考试记录
-	getKaoshiQuestionList (params) {
+	history(params) {
 		return request({
-			url: '/mp/exam/kaoshi/getQuestionList',
+			url: '/mp/exam/kaoshi/history',
 			method: 'POST',
 			data: params,
 	        header: {"Content-Type":"application/json;charset=UTF-8"} 
 		})
 	},
-	
 	//交卷
 	submitAnswerMap(params){
 		return request({
