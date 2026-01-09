@@ -52,28 +52,40 @@ import { onMounted, ref } from 'vue';
 import KaoshiAPIService from '@/api/kaoshi.service.js'
 import { onLoad } from "@dcloudio/uni-app";
 
-//测试id
-let examId = ref(undefined)
+//用户id
+let userId = ref(getApp().globalData.userId)
+userId.value = 999
 
+//测试id
+let examId = ref(null)
 //获取上一个页面传递的参数
 onLoad((option) => {
 	examId.value = option.examId;
+	
+	examId.value = 1;
 });
 
 onMounted(()=>{
+	//开始/继续模拟考试
 	start()
 })
 		
-
+// 用户测试记录
+let userExamId = ref(null)
+let userExamPageNo = ref(null)
 // 问题选项列表
 let question_option_List = ref([])
 //获取题目列表信息和用户测试记录信息
 function start(){
-	let params = {user_id:999,exam_id:examId.value}
+	let params = {user_id:userId.value,exam_id:examId.value}
 	KaoshiAPIService.start(params).then((res) => {
 		console.log(res)
 		if (res.code == 200) {
-			question_option_List.value = res.data
+			//获取数据
+			question_option_List.value = res.data.questions
+			
+			userExamId.value = res.data.user_exam_id
+			userExamPageNo.value = res.data.page_no
 		}
 	})
 }
@@ -83,8 +95,7 @@ function start(){
 let userAnswerMap = ref({})
 //选项改变时
 function handleCheckboxChange(e,question_id){
-	console.log(e.detail.value)
-	console.log(question_id)
+	console.log(question_id,e.detail.value)
 	//将已选的题目id-已选的选项ID,进行关联存储
 	userAnswerMap.value[question_id] = e.detail.value
 }
@@ -105,16 +116,52 @@ const jumpToQuestion = (idx) => {
 
 //答题卡中题目是否已经作答
 function isAnswerd(qid){
-	return userAnswerMap.value.hasOwnProperty(qid)
+	const ans = userAnswerMap.value[qid]
+	// 多选题：答案是数组，需判断长度 > 0
+	if (Array.isArray(ans)) {
+	return ans.length > 0
+	}
+	// 单选题：有非空值即可
+	return ans !== undefined && ans !== null && ans !== ''
+}
+
+// 是否全部作答
+function isAllAnswered() {
+  return question_option_List.value.every(item => {
+    const qid = item.question.id
+    const ans = userAnswerMap.value[qid]
+    // 多选题：答案是数组，需要判断长度
+    if (Array.isArray(ans)) {
+      return ans.length > 0
+    }
+    // 单选题：只要有值即可
+    return ans !== undefined && ans !== null && ans !== ''
+  })
 }
 
 //交卷
 function toSubmit(){
-	console.log(userAnswerMap.value)
-	let params = {exam_id:examId.value,answer_map:userAnswerMap.value}
+	if (!isAllAnswered()) {
+		uni.showToast({
+		  title: '还有未作答的题目，请先完成所有题目',
+		  icon: 'none',
+		  duration: 2000
+		})
+		return
+	}
+	
+	let params = {
+		user_exam_id:userExamId.value,
+		answer_map:userAnswerMap.value,
+	}
 	KaoshiAPIService.submitAnswerMap(params).then((res) => {
 		console.log(res)
-		
+		if(res.code != 200){
+			uni.showToast({
+				title: '交卷失败,'+res.message,
+				duration: 2000
+			})
+		}
 	})
 }
 

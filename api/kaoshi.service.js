@@ -24,7 +24,7 @@ const APIResources = {
 	//交卷
 	submitAnswerMap(params){
 		return request({
-			url: '/mp/exam/submitAnswerMap',
+			url: '/mp/exam/kaoshi/submitAnswerMap',
 			method: 'POST',
 			data: params,
 		    header: {"Content-Type":"application/json;charset=UTF-8"} 
