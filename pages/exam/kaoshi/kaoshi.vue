@@ -161,6 +161,11 @@ function toSubmit(){
 				title: '交卷失败,'+res.message,
 				duration: 2000
 			})
+		}else{
+			//跳转到考试结果展示页面
+			uni.navigateTo({
+				url: '/pages/exam/kaoshi/kaoshiResult?userExamId='+userExamId.value
+			})
 		}
 	})
 }

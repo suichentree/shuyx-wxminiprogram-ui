@@ -6,7 +6,7 @@ const APIResources = {
 	//开始/继续模拟考试 
 	start(params) {
 		return request({
-			url: '/mp/exam/kaoshi/start',
+			url: '/mp/exam/practice/start',
 			method: 'POST',
 			data: params,
 	        header: {"Content-Type":"application/json;charset=UTF-8"} 
@@ -15,25 +15,25 @@ const APIResources = {
 	//获取模拟考试记录
 	history(params) {
 		return request({
-			url: '/mp/exam/kaoshi/history',
+			url: '/mp/exam/practice/history',
 			method: 'POST',
 			data: params,
 	        header: {"Content-Type":"application/json;charset=UTF-8"} 
 		})
 	},
 	//交卷
-	submitAnswerMap(params){
+	submitAnswer(params){
 		return request({
-			url: '/mp/exam/kaoshi/submitAnswerMap',
+			url: '/mp/exam/practice/submitAnswer',
 			method: 'POST',
 			data: params,
 		    header: {"Content-Type":"application/json;charset=UTF-8"} 
 		})
 	},
-	//交卷
-	kaoshiResult(params){
+	//获取结果
+	practiceResult(params){
 		return request({
-			url: '/mp/exam/kaoshi/kaoshiResult',
+			url: '/mp/exam/practice/practiceResult',
 			method: 'POST',
 			data: params,
 		    header: {"Content-Type":"application/json;charset=UTF-8"} 

@@ -37,6 +37,12 @@
 			}
 		},
 		{
+			"path": "pages/exam/practice/practiceResult",
+			"style": {
+				"navigationBarTitleText": "顺序练习结果页面"
+			}
+		},
+		{
 			"path": "pages/exam/kaoshi/kaoshiInfo",
 			"style": {
 				"navigationBarTitleText": "模拟考试介绍"
@@ -46,6 +52,12 @@
 			"path": "pages/exam/kaoshi/kaoshi",
 			"style": {
 				"navigationBarTitleText": "模拟考试"
+			}
+		},
+		{
+			"path": "pages/exam/kaoshi/kaoshiResult",
+			"style": {
+				"navigationBarTitleText": "模拟考试结果"
 			}
 		}
 	],
