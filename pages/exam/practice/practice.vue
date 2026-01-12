@@ -1,50 +1,105 @@
 <template>
 	<view class="page-container">
+		<!-- 顶部进度条 -->
+		<view class="progress-bar">
+			<view class="progress-info">
+				<text class="progress-text">第 {{ page_no }} / {{ total_count }} 题</text>
+			</view>
+			<view class="progress-line">
+				<view class="progress-fill" :style="{width: (page_no / total_count * 100) + '%'}"></view>
+			</view>
+		</view>
+		
+		<!-- 题目内容区域 -->
 		<scroll-view class="content" scroll-y="true">
-			<view class="content-item" v-for="(item,index) in question_option_List" :key="item">
-				<view :id="index+1" style="display: flex;flex-direction: row;gap: 5px;">
-						<view><uni-tag :text="index+1+''" type="primary" size="mini" /></view>
-						<view style="font-size: 14px;color: rgb(51, 51, 51);">
-							<text>{{item.question.name}}</text>
-							<view style="font-size: 12px;color:gray;">{{item.question.type_name}}</view>
-						</view>
+			<view class="question-item" v-if="currentQuestion">
+				<view class="question-header">
+					<uni-tag :text="page_no + ''" type="primary" size="mini" />
+					<text class="question-type">{{ currentQuestion.type_name }}</text>
 				</view>
-				<view v-if="item.question.type == 1">
-					<!-- 单选 -->
-					<uni-data-checkbox mode="list" :map="{text:'content',value:'id'}" :localdata="item.options" @change="(e)=>{ handleCheckboxChange(e,item.question.id) }"></uni-data-checkbox>
+				<view class="question-content">{{ currentQuestion.name }}</view>
+				
+				<!-- 选项列表 -->
+				<view class="options-list">
+					<view v-if="currentQuestion.type == 1">
+						<!-- 单选 -->
+						<uni-data-checkbox 
+							mode="list" 
+							:map="{text:'content',value:'id'}" 
+							:localdata="currentOptions" 
+							:value="user_options"
+							:disabled="hasSubmitted"
+							@change="(e) => { handleCheckboxChange(e) }"
+						></uni-data-checkbox>
+					</view>
+					<view v-else-if="currentQuestion.type == 2">
+						<!-- 多选 -->
+						<uni-data-checkbox 
+							mode="list" 
+							:map="{text:'content',value:'id'}" 
+							multiple
+							:localdata="currentOptions" 
+							:value="user_options"
+							:disabled="hasSubmitted"
+							@change="(e) => { handleCheckboxChange(e) }"
+						></uni-data-checkbox>
+					</view>
 				</view>
-				<view v-else-if="item.question.type == 2">
-					<!-- 多选 -->
-					<uni-data-checkbox mode="list" :map="{text:'content',value:'id'}" multiple  :localdata="item.options" @change="(e)=>{ handleCheckboxChange(e,item.question.id) }"></uni-data-checkbox>
+				
+				<!-- 答题结果提示 -->
+				<view class="result-tip" v-if="hasSubmitted">
+					<view :class="['tip-content', isCorrect ? 'tip-correct' : 'tip-error']">
+						<uni-icons :type="isCorrect ? 'checkmarkempty' : 'closeempty'" :color="isCorrect ? '#67c23a' : '#f56c6c'" size="20"></uni-icons>
+						<text>{{ isCorrect ? '回答正确' : '回答错误' }}</text>
+					</view>
+					<!-- 显示正确答案（如果答错） -->
+					<view class="correct-answer-tip" v-if="!isCorrect && correctOptionIds.length > 0">
+						<text class="answer-label">正确答案：</text>
+						<text class="answer-value">{{ formatCorrectAnswer() }}</text>
+					</view>
 				</view>
 			</view>
 		</scroll-view>
+		
+		<view>
+			<button class="btn-prev" :disabled="page_no <= 1" @click="prevQuestion">上一题</button>
+			<button class="btn-next" :disabled="page_no >= total_count" @click="nextQuestion">下一题</button>
+		</view>
+		
+		<!-- 底部按钮区域 -->
+		<view class="footer">
+			<button style="flex: 1;" @click="openAnswerCard">答题卡</button>
+			<button style="flex:3;" :disabled="hasSubmitted"
+					@click="submitAnswer">提交答案</button>
+		</view>
 	</view>
-	<!-- 底部区域 -->
-	<view class="footer">
-		<button style="flex: 1;" @click="openAnswerCard">答题卡</button>
-		<button style="flex:3;" @click="toSubmit">交卷</button>
-	</view>
-	
+
+
 	<!-- 答题卡弹窗 -->
 	<uni-popup ref="answerCardPopup" type="bottom" :mask-click="true">
-	  <view class="answer-card">
-		<view class="card-header">
-		  <text class="card-title">答题卡</text>
+		<view class="answer-card">
+			<view class="card-header">
+			<text class="card-title">答题卡</text>
+			</view>
+			<view class="card-list">
+			<view
+				class="card-item"
+				v-for="n in total_count"
+				:key="n"
+				@click="jumpToQuestion(n)"
+				:class="{
+				answered: isAnswered(n),
+				right: isRight(n),
+				wrong: isWrong(n),
+				current: n === page_no
+				}"
+			>
+				<text class="card-num">{{ n }}</text>
+			</view>
+			</view>
 		</view>
-		<view class="card-list">
-		  <view class="card-item"
-			v-for="(item,index) in question_option_List"
-			:key="item.question.id"
-			@click="jumpToQuestion(index + 1)"
-			:class="{answered: isAnswerd(item.question.id) }"
-		  >
-			<text class="card-num">{{ index + 1 }}</text>
-		  </view>
-		</view>
-	  </view>
 	</uni-popup>
-	
+
 </template>
 
 <script setup>
@@ -56,118 +111,186 @@ import { onLoad } from "@dcloudio/uni-app";
 let userId = ref(getApp().globalData.userId)
 userId.value = 999
 
-//测试id
-let examId = ref(null)
-//获取上一个页面传递的参数
-onLoad((option) => {
-	examId.value = option.examId;
-	
-	examId.value = 1;
+// 用户测试记录
+let user_exam_id = ref(null)
+let page_no = ref(null)
+let total_count = ref(0)
+onLoad((obj) => {
+	user_exam_id.value = obj.userExamId;
 });
 
 onMounted(()=>{
-	//开始/继续模拟考试
-	start()
+	getQuestion()
 })
-		
-// 用户测试记录
-let userExamId = ref(null)
-let userExamPageNo = ref(null)
-// 问题选项列表
-let question_option_List = ref([])
-//获取题目列表信息和用户测试记录信息
-function start(){
-	let params = {user_id:userId.value,exam_id:examId.value}
-	practiceAPIService.start(params).then((res) => {
+
+
+
+
+// 答题卡用的答题记录（按题号存）
+let answerMap = ref({})  // { [pageNo]: { userOptions, isCorrect } }
+
+// 打开答题卡
+let answerCardPopup = ref(null)
+function openAnswerCard() {
+  answerCardPopup.value?.open()
+
+  loadAnswerCard()
+}
+//获取答题卡信息
+function loadAnswerCard() {
+     practiceAPIService.getAnswerCardInfo({ user_exam_id: user_exam_id.value })
+       .then(res => {
+         if (res.code === 200) {
+           total_count.value = res.data.total_count
+           answerMap.value = res.data.answer_card.reduce((acc, item) => {
+             acc[item.page_no] = {
+               userOptions: item.user_options,
+               isCorrect: item.is_correct
+             }
+             return acc
+           }, {})
+         }
+       })
+}
+
+
+// 当前题目和选项
+let currentQuestion = ref(null)
+let currentOptions = ref([])
+let user_options = ref(null) // 单选是数字，多选是数组
+let hasSubmitted = ref(false) // 是否已提交当前题目
+let isCorrect = ref(false) // 当前题目是否正确
+let correctOptionIds = ref([]) // 正确答案选项ID列表
+
+// 获取题目
+function getQuestion(){
+	// 重置状态
+	user_options.value = null
+	hasSubmitted.value = false
+	isCorrect.value = false
+	correctOptionIds.value = []
+	
+	let params = {user_exam_id:user_exam_id.value,page_no:page_no.value}
+	practiceAPIService.getQuestion(params).then((res) => {
 		console.log(res)
 		if (res.code == 200) {
-			//获取数据
-			question_option_List.value = res.data.questions
+			page_no.value = res.data.page_no
+			total_count.value = res.data.total_count
+			currentQuestion.value = res.data.question
+			currentOptions.value = res.data.options || []
+			correctOptionIds.value = res.data.correct_option_ids || []
 			
-			userExamId.value = res.data.user_exam_id
-			userExamPageNo.value = res.data.page_no
+			//若有提交的用户选项数据，表示该题目已经提交了
+			if(res.data.user_options != null){
+				user_options.value = res.data.user_options
+				isCorrect.value = res.data.is_correct
+				hasSubmitted.value = true
+			}
 		}
 	})
 }
 
-//用户题目选项键值对（键：question_id，值：选中的option_id，单选是数字，多选是数组）
-//例如 {4: 17, 6: 25, 8: 32,11:[46,45]}
-let userAnswerMap = ref({})
-//选项改变时
-function handleCheckboxChange(e,question_id){
-	console.log(question_id,e.detail.value)
-	//将已选的题目id-已选的选项ID,进行关联存储
-	userAnswerMap.value[question_id] = e.detail.value
+// 选项改变时
+function handleCheckboxChange(e) {
+	user_options.value = e.detail.value
 }
 
-//打开答题卡
-let type = ref("center")
-let answerCardPopup = ref(null)
-function openAnswerCard() {
-  answerCardPopup.value?.open();
-}
-
-//答题卡跳转题目
-let currentIndex = ref(0)
-const jumpToQuestion = (idx) => {
-  var anchor = document.getElementById(idx);
-  anchor.scrollIntoView();
-};
-
-//答题卡中题目是否已经作答
-function isAnswerd(qid){
-	const ans = userAnswerMap.value[qid]
-	// 多选题：答案是数组，需判断长度 > 0
-	if (Array.isArray(ans)) {
-	return ans.length > 0
-	}
-	// 单选题：有非空值即可
-	return ans !== undefined && ans !== null && ans !== ''
-}
-
-// 是否全部作答
-function isAllAnswered() {
-  return question_option_List.value.every(item => {
-    const qid = item.question.id
-    const ans = userAnswerMap.value[qid]
-    // 多选题：答案是数组，需要判断长度
-    if (Array.isArray(ans)) {
-      return ans.length > 0
-    }
-    // 单选题：只要有值即可
-    return ans !== undefined && ans !== null && ans !== ''
-  })
-}
-
-//交卷
-function toSubmit(){
-	if (!isAllAnswered()) {
+// 提交答案
+function submitAnswer() {
+	if(!user_options.value || (Array.isArray(user_options.value) && user_options.value.length === 0)) {
 		uni.showToast({
-		  title: '还有未作答的题目，请先完成所有题目',
-		  icon: 'none',
-		  duration: 2000
+			title: '请先选择答案',
+			icon: 'none'
 		})
 		return
 	}
 	
 	let params = {
-		user_exam_id:userExamId.value,
-		answer_map:userAnswerMap.value,
+		user_exam_id: user_exam_id.value,
+		question_id: currentQuestion.value.id,
+		option_ids: user_options.value
 	}
-	practiceAPIService.submitAnswerMap(params).then((res) => {
+	
+	practiceAPIService.submitAnswer(params).then((res) => {
 		console.log(res)
-		if(res.code != 200){
+		if(res.code == 200) {
+			isCorrect.value = res.data.is_correct === 1
+			hasSubmitted.value = true
+			
+			// 注意：page_no 前端自己控制，不依赖 res.data.page_no
+			// 记录到答题卡
+			answerMap.value[page_no.value] = {
+				userOptions: user_options.value,
+				isCorrect: isCorrect.value
+			}
+			
+			// 如果已完成，延迟跳转到结果页
+			if(res.data.finished) {
+				uni.showToast({
+					title: '练习完成！',
+					icon: 'success',
+					duration: 1500
+				})
+				setTimeout(() => {
+					uni.navigateTo({
+						url: '/pages/exam/practice/practiceResult?userExamId=' + user_exam_id.value
+					})
+				}, 1500)
+			}
+		} else {
 			uni.showToast({
-				title: '交卷失败,'+res.message,
-				duration: 2000
-			})
-		}else{
-			//跳转到考试结果展示页面
-			uni.navigateTo({
-				url: '/pages/exam/kaoshi/kaoshiResult?userExamId='+userExamId.value
+				title: '提交失败：' + res.message,
+				icon: 'none'
 			})
 		}
 	})
+}
+
+// 格式化正确答案显示
+function formatCorrectAnswer() {
+	if(correctOptionIds.value.length === 0) return '-'
+	// 根据正确答案ID找到对应的选项内容
+	let correctOptions = currentOptions.value.filter(opt => correctOptionIds.value.includes(opt.id))
+	return correctOptions.map(opt => opt.content).join('、')
+}
+
+// 下一题
+function nextQuestion() {
+	// if(page_no.value >= total_count.value) {
+	// 	// 已完成，跳转到结果页
+	// 	uni.navigateTo({
+	// 		url: '/pages/exam/practice/practiceResult?userExamId=' + user_exam_id.value
+	// 	})
+	// 	return
+	// }
+	page_no.value += 1
+	getQuestion()
+}
+
+// 上一题（需要重新开始或记录历史，这里简化处理，提示用户）
+function prevQuestion() {
+    if(page_no.value > 1) {
+        page_no.value -= 1
+        getQuestion()
+    }
+}
+
+// 答题卡跳转
+function jumpToQuestion(n) {
+  page_no.value = n
+  answerCardPopup.value?.close()
+  getQuestion()
+}
+
+// 答题卡状态判断
+function isAnswered(n) {
+  return !!answerMap.value[n]
+}
+function isRight(n) {
+  return answerMap.value[n]?.isCorrect === true || answerMap.value[n]?.isCorrect === 1
+}
+function isWrong(n) {
+  return answerMap.value[n]?.isCorrect === false || answerMap.value[n]?.isCorrect === 0
 }
 
 </script>
@@ -175,29 +298,163 @@ function toSubmit(){
 .page-container {
 	display: flex;
 	flex-direction: column;
-	height: 90vh;
+	height: 100vh;
+	background-color: #f5f5f5;
 }
 
+/* 进度条 */
+.progress-bar {
+	background-color: #fff;
+	padding: 20rpx 30rpx;
+}
+
+.progress-info {
+	display: flex;
+	justify-content: space-between;
+	margin-bottom: 15rpx;
+}
+
+.progress-text {
+	font-size: 28rpx;
+	color: #333;
+}
+
+.progress-line {
+	height: 8rpx;
+	background-color: #e4e7ed;
+	border-radius: 4rpx;
+	overflow: hidden;
+}
+
+.progress-fill {
+	height: 100%;
+	background: linear-gradient(90deg, #409eff 0%, #67c23a 100%);
+	transition: width 0.3s;
+}
+
+/* 内容区域 */
 .content {
 	flex: 1;
-	overflow-y: auto;
+	padding: 20rpx;
 }
 
-.content-item {
-	background-color: white;
-	margin:10px;
-	padding: 10px;
+.question-item {
+	background-color: #fff;
+	border-radius: 16rpx;
+	padding: 30rpx;
 }
 
+.question-header {
+	display: flex;
+	align-items: center;
+	gap: 15rpx;
+	margin-bottom: 30rpx;
+}
+
+.question-type {
+	font-size: 24rpx;
+	color: #909399;
+}
+
+.question-content {
+	font-size: 32rpx;
+	color: #333;
+	line-height: 1.8;
+	margin-bottom: 40rpx;
+}
+
+.options-list {
+	margin-bottom: 30rpx;
+}
+
+/* 答题结果提示 */
+.result-tip {
+	margin-top: 30rpx;
+	padding: 20rpx;
+	border-radius: 8rpx;
+}
+
+.tip-content {
+	display: flex;
+	align-items: center;
+	gap: 10rpx;
+	font-size: 28rpx;
+	font-weight: 500;
+}
+
+.tip-correct {
+	color: #67c23a;
+	background-color: #f0f9ff;
+}
+
+.tip-error {
+	color: #f56c6c;
+	background-color: #fef0f0;
+}
+
+/* 正确答案提示 */
+.correct-answer-tip {
+	margin-top: 20rpx;
+	padding: 20rpx;
+	background-color: #f0f9ff;
+	border-radius: 8rpx;
+	font-size: 26rpx;
+}
+
+.answer-label {
+	color: #606266;
+	margin-right: 10rpx;
+}
+
+.answer-value {
+	color: #67c23a;
+	font-weight: 500;
+}
+
+/* 底部按钮 */
 .footer {
 	display: flex;
+	gap: 20rpx;
+	padding: 20rpx;
 	background-color: #fff;
-	position: fixed;
-	bottom: 0;
-	left: 0;
-	right: 0;
-	z-index: 99;
+	box-shadow: 0 -2rpx 10rpx rgba(0,0,0,0.05);
 }
+
+.btn-prev, .btn-submit, .btn-next {
+	flex: 1;
+	height: 80rpx;
+	line-height: 80rpx;
+	border-radius: 40rpx;
+	font-size: 30rpx;
+}
+
+.btn-prev {
+	background-color: #f0f0f0;
+	color: #606266;
+}
+
+.btn-prev:disabled {
+	opacity: 0.5;
+}
+
+.btn-submit {
+	background-color: #409eff;
+	color: #fff;
+}
+
+.btn-submit:disabled {
+	opacity: 0.5;
+}
+
+.btn-next {
+	background-color: #67c23a;
+	color: #fff;
+}
+
+.btn-next:disabled {
+	opacity: 0.5;
+}
+
 
 .answer-card {
   background-color: #fff;
@@ -237,4 +494,3 @@ function toSubmit(){
   color: #1890ff;
 }
 </style>
-  

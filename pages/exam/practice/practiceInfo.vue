@@ -1,20 +1,24 @@
 <template>
 	<view class="page-container">
-		<uni-section title="介绍页面" type="line">
+		<uni-section title="顺序练习介绍页面" type="line">
 			<uni-list :border="false">
 				<uni-list-item :title="exam_info.name">
 					<template v-slot:footer>
-						<button type="primary" size="mini" @click="toStart">开始考试</button>
+						<button type="primary" size="mini" @click="toStart">开始练习</button>
 					</template>
 				</uni-list-item>
 			</uni-list>
 		</uni-section>
-		<uni-section title="历史记录" type="line">
+		<uni-section title="顺序练习历史记录" type="line">
 			<uni-list :border="false">
 				<uni-list-item v-for="(item,index) in history_list" 
+					:key="item.id"
 					:border="false" 
 					:title="exam_info.name" 
-					:note="'完成时间 '+item.finish_time" :rightText="'正确率 '+item.score"/>
+					:note="'完成时间 ' + (item.finish_time || '-')" 
+					:rightText="'正确率 ' + (item.accuracy_rate || 0) + '%'"
+					@click="viewResult(item.id)"
+				/>
 			</uni-list>
 		</uni-section>
 	</view>
@@ -52,7 +56,6 @@ let exam_info = ref({
 	id:null,
 	tag:null
 })
-
 //获取历史记录
 function history(){
 	let params = {user_id:999,exam_id:examId.value}
@@ -65,9 +68,31 @@ function history(){
 	})
 }
 
+let userExamId = ref(null)
+let pageNo = ref(null)
 function toStart(){
+	//调用接口，开始/继续顺序练习
+	let params = {user_id:userId.value,exam_id:examId.value}
+	practiceAPIService.start(params).then((res) => {
+		console.log(res)
+		if (res.code == 200) {
+			userExamId.value = res.data.user_exam_id
+			pageNo.value = res.data.page_no
+			
+			//跳转到练习页面
+			uni.navigateTo({
+				url: '/pages/exam/practice/practice?userExamId='+userExamId.value
+			})
+		}else{
+			
+		}
+	})
+}
+
+// 查看历史记录结果
+function viewResult(userExamId) {
 	uni.navigateTo({
-		url: '/pages/exam/practice/practice?examId='+examId.value
+		url: '/pages/exam/practice/practiceResult?userExamId=' + userExamId
 	})
 }
 </script>
