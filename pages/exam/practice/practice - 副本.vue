@@ -3,10 +3,10 @@
 		<!-- 顶部进度条 -->
 		<view class="progress-bar">
 			<view class="progress-info">
-				<text class="progress-text">第 {{ page_no + 1 }} / {{ total_count }} 题</text>
+				<text class="progress-text">第 {{ page_no }} / {{ total_count }} 题</text>
 			</view>
 			<view class="progress-line">
-				<view class="progress-fill" :style="{width: ( (page_no+1) / total_count * 100) + '%'}"></view>
+				<view class="progress-fill" :style="{width: (page_no / total_count * 100) + '%'}"></view>
 			</view>
 		</view>
 		
@@ -14,7 +14,7 @@
 		<scroll-view class="content" scroll-y="true">
 			<view class="question-item" v-if="currentQuestion">
 				<view class="question-header">
-					<uni-tag :text="page_no + 1 + ''" type="primary" size="mini" />
+					<uni-tag :text="page_no + ''" type="primary" size="mini" />
 					<text class="question-type">{{ currentQuestion.type_name }}</text>
 				</view>
 				<view class="question-content">{{ currentQuestion.name }}</view>
@@ -27,9 +27,9 @@
 							mode="list" 
 							:map="{text:'content',value:'id'}" 
 							:localdata="currentOptions" 
-							:value="selected_option_ids"
+							:value="user_options"
 							:disabled="hasSubmitted"
-							@change="(e)=>{ handleCheckboxChange(e,currentQuestion.type) }"
+							@change="(e) => { handleCheckboxChange(e) }"
 						></uni-data-checkbox>
 					</view>
 					<view v-else-if="currentQuestion.type == 2">
@@ -39,22 +39,21 @@
 							:map="{text:'content',value:'id'}" 
 							multiple
 							:localdata="currentOptions" 
-							:value="selected_option_ids"
+							:value="user_options"
 							:disabled="hasSubmitted"
-							@change="(e)=>{ handleCheckboxChange(e,currentQuestion.type) }"
+							@change="(e) => { handleCheckboxChange(e) }"
 						></uni-data-checkbox>
 					</view>
 				</view>
 				
-				<!-- 若已答题，则显示答题结果 -->
+				<!-- 答题结果提示 -->
 				<view class="result-tip" v-if="hasSubmitted">
-					<!-- 判断是否答对 -->
 					<view :class="['tip-content', isCorrect ? 'tip-correct' : 'tip-error']">
 						<uni-icons :type="isCorrect ? 'checkmarkempty' : 'closeempty'" :color="isCorrect ? '#67c23a' : '#f56c6c'" size="20"></uni-icons>
 						<text>{{ isCorrect ? '回答正确' : '回答错误' }}</text>
 					</view>
-					<!--显示正确答案 -->
-					<view class="correct-answer-tip">
+					<!-- 显示正确答案（如果答错） -->
+					<view class="correct-answer-tip" v-if="!isCorrect && correctOptionIds.length > 0">
 						<text class="answer-label">正确答案：</text>
 						<text class="answer-value">{{ formatCorrectAnswer() }}</text>
 					</view>
@@ -63,8 +62,8 @@
 		</scroll-view>
 		
 		<view>
-			<button class="btn-prev" :disabled="page_no < 0" @click="prevQuestion">上一题</button>
-			<button class="btn-next" :disabled="page_no >= total_count-1" @click="nextQuestion">下一题</button>
+			<button class="btn-prev" :disabled="page_no <= 1" @click="prevQuestion">上一题</button>
+			<button class="btn-next" :disabled="page_no >= total_count" @click="nextQuestion">下一题</button>
 		</view>
 		
 		<!-- 底部按钮区域 -->
@@ -75,6 +74,7 @@
 		</view>
 	</view>
 
+
 	<!-- 答题卡弹窗 -->
 	<uni-popup ref="answerCardPopup" type="bottom" :mask-click="true">
 		<view class="answer-card">
@@ -82,14 +82,24 @@
 			<text class="card-title">答题卡</text>
 			</view>
 			<view class="card-list">
-			<view class="card-item" v-for="(item,index) in answerMap" :key="index"
-				@click="jumpToQuestion(item.qid)" 
-				:class="{right_css: isRight(item),wrong_css: isWrong(item) }">
-				<text class="card-num">{{ index + 1 }}</text>
+			<view
+				class="card-item"
+				v-for="n in total_count"
+				:key="n"
+				@click="jumpToQuestion(n)"
+				:class="{
+				answered: isAnswered(n),
+				right: isRight(n),
+				wrong: isWrong(n),
+				current: n === page_no
+				}"
+			>
+				<text class="card-num">{{ n }}</text>
 			</view>
 			</view>
 		</view>
 	</uni-popup>
+
 </template>
 
 <script setup>
@@ -102,193 +112,185 @@ let userId = ref(getApp().globalData.userId)
 userId.value = 999
 
 // 用户测试记录
-let userExamId = ref(null)
+let user_exam_id = ref(null)
+let page_no = ref(null)
+let total_count = ref(0)
 onLoad((obj) => {
-	userExamId.value = obj.userExamId;
+	user_exam_id.value = obj.userExamId;
 });
 
 onMounted(()=>{
-	getQuestion(userExamId.value)
+	getQuestion()
 })
 
-// 当前题目id
-let currentQuestionId = ref(null)
-// 当前题目对象
-let currentQuestion = ref(null)
-//当前选项数组
-let currentOptions = ref([])
-// 全部题目id数组
-let quesionIds = ref([])
-// 题目进度索引
-let page_no = ref(null)
-// 题目总数
-let total_count = ref(0)
-let selected_option_ids = ref(undefined) //用户答题选项，单选多选都是数组
-let hasSubmitted = ref(false) //该题目是否已答题
-let isCorrect = ref(false) 	// 判断当前题目是否正确
 
-// 获取题目
-function getQuestion(userExamId,questionId){
-	// 重置状态
-	currentQuestionId.value = null
-	currentQuestion.value = null
-	currentOptions.value = []
-	quesionIds.value = []
-	selected_option_ids.value = null
-	hasSubmitted.value = false
-	isCorrect.value = false
-	
-	let params = {user_exam_id:userExamId,question_id:questionId}
-	practiceAPIService.getQuestion(params).then((res) => {
-		if (res.code == 200) {
-			currentQuestionId.value = res.data.question_id
-			currentQuestion.value = res.data.question_options.question
-			currentOptions.value = res.data.question_options.options
-			quesionIds.value = res.data.question_ids
-			
-			//查找当前题目在列表中的索引(从0开始)
-			page_no.value = quesionIds.value.indexOf(currentQuestionId.value);
-			total_count.value = quesionIds.value.length
-			
-			//若有提交的用户选项数据，表示该题目已答
-			if(res.data.selected_option_ids != null){
-				//设置该题目已提交
-				hasSubmitted.value = true
-				//获取用户选项
-				selected_option_ids.value = res.data.selected_option_ids
-				//获取是否答对
-				isCorrect.value = res.data.is_correct
-			}else{
-				hasSubmitted.value = false
-				//若是单选题，则初始化为null,多选题则初始化为[]
-				if(currentQuestion.value.type == 1){
-					selected_option_ids.value = null
-				}else if (currentQuestion.value.type == 2){
-					selected_option_ids.value = []
-				}
-			}
-		}
-	})
-}
 
-// 提交答案
-function submitAnswer() {
-	if(!selected_option_ids.value || selected_option_ids.value.length === 0) {
-		uni.showToast({
-			title: '请先选择答案',
-			icon: 'none'
-		})
-	}else{
-		//构建参数
-		let params = {
-			user_exam_id: userExamId.value,
-			question_id: currentQuestionId.value,
-			question_type:currentQuestion.value.type,
-			option_ids: selected_option_ids.value
-		}
-		practiceAPIService.submitAnswer(params).then((res) => {
-			console.log(res)
-			if(res.code == 200) {
-				//重新获取该题目信息
-				getQuestion(userExamId.value)
-			} else {
-				uni.showToast({
-					title: '提交失败：' + res.message,
-					icon: 'none'
-				})
-			}
-		})
-	}
-}
 
-// 选项改变时,根据题目类型，处理选中的选项ID。
-function handleCheckboxChange(e,question_type) {
-	let select_array = new Array()
-	if (question_type == 1) {
-		//单选时。将选中的选项id，转换为数组
-		select_array.push(e.detail.value)
-		selected_option_ids.value = select_array
-	}else{
-		//多选时
-		selected_option_ids.value = e.detail.value
-	}
-}
-
-// 格式化正确答案显示
-function formatCorrectAnswer() {
-	let right_array = new Array()
-	// 遍历选项信息，找出正确答案选项,并格式化
-	currentOptions.value.forEach(function(opt) {
-		if(opt.is_right == 1){
-			right_array.push(opt.content)
-		}
-	}, this);
-	return right_array.join('、')
-}
-
-// 下一题
-function nextQuestion() {
-	//题目索引+1
-	page_no.value += 1
-	let next_question_id = quesionIds.value[page_no.value]
-	//重新获取题目
-	getQuestion(userExamId.value,next_question_id)
-}
-
-// 上一题
-function prevQuestion() {
-    //题目索引-1
-    page_no.value -= 1
-    let prev_question_id = quesionIds.value[page_no.value]
-    //重新获取题目
-    getQuestion(userExamId.value,prev_question_id)
-}
-
-//答题卡相关==============
-
+// 答题卡用的答题记录（按题号存）
+let answerMap = ref({})  // { [pageNo]: { userOptions, isCorrect } }
 
 // 打开答题卡
 let answerCardPopup = ref(null)
 function openAnswerCard() {
   answerCardPopup.value?.open()
+
   loadAnswerCard()
 }
-// 答题卡信息
-let answerMap = ref([])  // [{qid,is_correct}]
 //获取答题卡信息
 function loadAnswerCard() {
-	//初始化
-	answerMap.value = []
-	practiceAPIService.getAnswerCardInfo({ user_exam_id: userExamId.value })
-	.then(res => {
-		if (res.code === 200) {
-			let all_question_ids = res.data.all_question_ids; //[1,2,.....]
-			let user_exam_options_list = res.data.user_exam_options_list;  //[{q_id,is_correct}]
-			//遍历
-			all_question_ids.map(qid =>{
-				// 查找用户答题列表中当前qid对应的项
-				let item = user_exam_options_list.find(item => item.q_id === qid);
-				// 有匹配项则取其is_correct，无匹配项默认设为null（比如用户未作答）
-				let is_correct = item ? item.is_correct:null;
-				// 构建qid和is_correct的对象，添加到answerMap数组中
-				answerMap.value.push({ qid, is_correct })
-			});
+     practiceAPIService.getAnswerCardInfo({ user_exam_id: user_exam_id.value })
+       .then(res => {
+         if (res.code === 200) {
+           total_count.value = res.data.total_count
+           answerMap.value = res.data.answer_card.reduce((acc, item) => {
+             acc[item.page_no] = {
+               userOptions: item.user_options,
+               isCorrect: item.is_correct
+             }
+             return acc
+           }, {})
+         }
+       })
+}
+
+
+// 当前题目和选项
+let currentQuestion = ref(null)
+let currentOptions = ref([])
+let user_options = ref(null) // 单选是数字，多选是数组
+let hasSubmitted = ref(false) // 是否已提交当前题目
+let isCorrect = ref(false) // 当前题目是否正确
+let correctOptionIds = ref([]) // 正确答案选项ID列表
+
+// 获取题目
+function getQuestion(){
+	// 重置状态
+	user_options.value = null
+	hasSubmitted.value = false
+	isCorrect.value = false
+	correctOptionIds.value = []
+	
+	let params = {user_exam_id:user_exam_id.value,page_no:page_no.value}
+	practiceAPIService.getQuestion(params).then((res) => {
+		console.log(res)
+		if (res.code == 200) {
+			page_no.value = res.data.page_no
+			total_count.value = res.data.total_count
+			currentQuestion.value = res.data.question
+			currentOptions.value = res.data.options || []
+			correctOptionIds.value = res.data.correct_option_ids || []
+			
+			//若有提交的用户选项数据，表示该题目已经提交了
+			if(res.data.user_options != null){
+				user_options.value = res.data.user_options
+				isCorrect.value = res.data.is_correct
+				hasSubmitted.value = true
+			}
 		}
 	})
 }
 
+// 选项改变时
+function handleCheckboxChange(e) {
+	user_options.value = e.detail.value
+}
+
+// 提交答案
+function submitAnswer() {
+	if(!user_options.value || (Array.isArray(user_options.value) && user_options.value.length === 0)) {
+		uni.showToast({
+			title: '请先选择答案',
+			icon: 'none'
+		})
+		return
+	}
+	
+	let params = {
+		user_exam_id: user_exam_id.value,
+		question_id: currentQuestion.value.id,
+		option_ids: user_options.value
+	}
+	
+	practiceAPIService.submitAnswer(params).then((res) => {
+		console.log(res)
+		if(res.code == 200) {
+			isCorrect.value = res.data.is_correct === 1
+			hasSubmitted.value = true
+			
+			// 注意：page_no 前端自己控制，不依赖 res.data.page_no
+			// 记录到答题卡
+			answerMap.value[page_no.value] = {
+				userOptions: user_options.value,
+				isCorrect: isCorrect.value
+			}
+			
+			// 如果已完成，延迟跳转到结果页
+			if(res.data.finished) {
+				uni.showToast({
+					title: '练习完成！',
+					icon: 'success',
+					duration: 1500
+				})
+				setTimeout(() => {
+					uni.navigateTo({
+						url: '/pages/exam/practice/practiceResult?userExamId=' + user_exam_id.value
+					})
+				}, 1500)
+			}
+		} else {
+			uni.showToast({
+				title: '提交失败：' + res.message,
+				icon: 'none'
+			})
+		}
+	})
+}
+
+// 格式化正确答案显示
+function formatCorrectAnswer() {
+	if(correctOptionIds.value.length === 0) return '-'
+	// 根据正确答案ID找到对应的选项内容
+	let correctOptions = currentOptions.value.filter(opt => correctOptionIds.value.includes(opt.id))
+	return correctOptions.map(opt => opt.content).join('、')
+}
+
+// 下一题
+function nextQuestion() {
+	// if(page_no.value >= total_count.value) {
+	// 	// 已完成，跳转到结果页
+	// 	uni.navigateTo({
+	// 		url: '/pages/exam/practice/practiceResult?userExamId=' + user_exam_id.value
+	// 	})
+	// 	return
+	// }
+	page_no.value += 1
+	getQuestion()
+}
+
+// 上一题（需要重新开始或记录历史，这里简化处理，提示用户）
+function prevQuestion() {
+    if(page_no.value > 1) {
+        page_no.value -= 1
+        getQuestion()
+    }
+}
 
 // 答题卡跳转
-function jumpToQuestion(qid) {
+function jumpToQuestion(n) {
+  page_no.value = n
   answerCardPopup.value?.close()
-  getQuestion(userExamId.value,qid)
+  getQuestion()
 }
+
 // 答题卡状态判断
-function isRight(item) {
-  return item.is_correct == 1;
+function isAnswered(n) {
+  return !!answerMap.value[n]
 }
-function isWrong(item) {
-  return item.is_correct == 0;
+function isRight(n) {
+  return answerMap.value[n]?.isCorrect === true || answerMap.value[n]?.isCorrect === 1
+}
+function isWrong(n) {
+  return answerMap.value[n]?.isCorrect === false || answerMap.value[n]?.isCorrect === 0
 }
 
 </script>
@@ -485,17 +487,10 @@ function isWrong(item) {
 	background-color: #f5f5f5;
 	font-size: 32rpx;
 	color: #333;
+	
 }
-
-/* 答对样式（绿色背景+白色文字） */
-.right_css {
-	background-color: #4cd964;
-	border-color: #4cd964;
+.answered {
+  background-color: #e6f7ff;
+  color: #1890ff;
 }
-/* 答错样式（红色背景+白色文字） */
-.wrong_css {
-	background-color: #ff3b30;
-	border-color: #ff3b30;
-}
-
 </style>

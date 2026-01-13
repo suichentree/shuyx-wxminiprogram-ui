@@ -23,7 +23,7 @@ const APIResources = {
 	},
 	getAnswerCardInfo(params) {
 		return request({
-			url: '/mp/exam/practice/getQuestion',
+			url: '/mp/exam/practice/getAnswerCardInfo',
 			method: 'POST',
 			data: params,
 	        header: {"Content-Type":"application/json;charset=UTF-8"} 
