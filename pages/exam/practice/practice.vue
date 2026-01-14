@@ -55,23 +55,30 @@
 					</view>
 					<!--显示正确答案 -->
 					<view class="correct-answer-tip">
-						<text class="answer-label">正确答案：</text>
+						<text class="answer-label">正确答案: \n</text>
 						<text class="answer-value">{{ formatCorrectAnswer() }}</text>
 					</view>
 				</view>
 			</view>
 		</scroll-view>
 		
-		<view>
-			<button class="btn-prev" :disabled="page_no < 0" @click="prevQuestion">上一题</button>
-			<button class="btn-next" :disabled="page_no >= total_count-1" @click="nextQuestion">下一题</button>
+		<!-- 上下题按钮 -->
+		<view class="page-nav">
+			<button class="nav-btn prev-btn" :disabled="page_no <= 0" @click="prevQuestion">
+				<uni-icons type="left" size="20"></uni-icons>
+				<text>上一题</text>
+			</button>
+			<button class="nav-btn next-btn" :disabled="page_no >= total_count-1" @click="nextQuestion">
+				<text>下一题</text>
+				<uni-icons type="right" size="20"></uni-icons>
+			</button>
 		</view>
 		
 		<!-- 底部按钮区域 -->
 		<view class="footer">
-			<button style="flex: 1;" @click="openAnswerCard">答题卡</button>
-			<button style="flex:3;" :disabled="hasSubmitted"
-					@click="submitAnswer">提交答案</button>
+			<button style="flex:1;" @click="openAnswerCard">答题卡</button>
+			<button style="flex:3;" v-if="isFinished" @click="submitAnswer">交卷</button>
+			<button style="flex:3;" v-else :disabled="hasSubmitted" @click="toResult">查看结果</button>		
 		</view>
 	</view>
 
@@ -126,6 +133,8 @@ let total_count = ref(0)
 let selected_option_ids = ref(undefined) //用户答题选项，单选多选都是数组
 let hasSubmitted = ref(false) //该题目是否已答题
 let isCorrect = ref(false) 	// 判断当前题目是否正确
+let isFinished = ref(false)  //判断当前测试中所有题目是否全部已答
+
 
 // 获取题目
 function getQuestion(userExamId,questionId){
@@ -145,6 +154,8 @@ function getQuestion(userExamId,questionId){
 			currentQuestion.value = res.data.question_options.question
 			currentOptions.value = res.data.question_options.options
 			quesionIds.value = res.data.question_ids
+			
+			isFinished.value = res.data.is_finished
 			
 			//查找当前题目在列表中的索引(从0开始)
 			page_no.value = quesionIds.value.indexOf(currentQuestionId.value);
@@ -223,7 +234,7 @@ function formatCorrectAnswer() {
 			right_array.push(opt.content)
 		}
 	}, this);
-	return right_array.join('、')
+	return right_array.join('\n')
 }
 
 // 下一题
@@ -243,6 +254,29 @@ function prevQuestion() {
     //重新获取题目
     getQuestion(userExamId.value,prev_question_id)
 }
+
+
+//交卷
+function toSubmitExam(){
+	let params = {
+		user_exam_id:userExamId.value,
+	}
+	KaoshiAPIService.submitAnswerMap(params).then((res) => {
+		console.log(res)
+		if(res.code != 200){
+			uni.showToast({
+				title: '交卷失败,'+res.message,
+				duration: 2000
+			})
+		}else{
+			//跳转到考试结果展示页面
+			uni.navigateTo({
+				url: '/pages/exam/kaoshi/kaoshiResult?userExamId='+userExamId.value
+			})
+		}
+	})
+}
+
 
 //答题卡相关==============
 
@@ -407,6 +441,44 @@ function isWrong(item) {
 .answer-value {
 	color: #67c23a;
 	font-weight: 500;
+}
+
+/* 上下题按钮 */
+.page-nav {
+	display: flex;
+	gap: 24rpx;
+	padding: 0 24rpx 24rpx;
+}
+.nav-btn {
+	flex: 1;
+	height: 92rpx;
+	line-height: 92rpx;
+	border-radius: 8rpx;
+	font-size: 30rpx;
+	font-weight: 500;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 12rpx;
+	transition: all 0.2s ease;
+	border: none;
+}
+.prev-btn {
+	background-color: #ffffff;
+	color: #606266;
+	box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+}
+.next-btn {
+	background: linear-gradient(135deg, #409eff 0%, #53a8ff 100%);
+	color: white;
+	box-shadow: 0 4rpx 12rpx rgba(64, 158, 255, 0.2);
+}
+.nav-btn:disabled {
+	opacity: 0.5;
+	transform: none !important;
+}
+.nav-btn:active:not(:disabled) {
+	transform: scale(0.98);
 }
 
 /* 底部按钮 */
