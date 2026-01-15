@@ -44,6 +44,17 @@
 							@change="(e)=>{ handleCheckboxChange(e,currentQuestion.type) }"
 						></uni-data-checkbox>
 					</view>
+					<view v-else-if="currentQuestion.type == 3">
+						<!-- 判断题 -->
+						<uni-data-checkbox 
+							mode="list" 
+							:map="{text:'content',value:'id'}" 
+							:localdata="currentOptions" 
+							:value="selected_option_ids"
+							:disabled="hasSubmitted"
+							@change="(e)=>{ handleCheckboxChange(e,currentQuestion.type) }"
+						></uni-data-checkbox>
+					</view>
 				</view>
 				
 				<!-- 若已答题，则显示答题结果 -->
@@ -77,25 +88,27 @@
 		<!-- 底部按钮区域 -->
 		<view class="footer">
 			<button style="flex:1;" @click="openAnswerCard">答题卡</button>
-			<button style="flex:3;" v-if="isFinished" @click="submitAnswer">交卷</button>
-			<button style="flex:3;" v-else :disabled="hasSubmitted" @click="toResult">查看结果</button>		
+			<button style="flex:3;" v-if="isFinished"  @click="toResult">分析结果</button>
+			<button style="flex:3;" v-else :disabled="hasSubmitted" @click="submitAnswer">提交答案</button>
 		</view>
 	</view>
 
 	<!-- 答题卡弹窗 -->
 	<uni-popup ref="answerCardPopup" type="bottom" :mask-click="true">
-		<view class="answer-card">
-			<view class="card-header">
-			<text class="card-title">答题卡</text>
+		<scroll-view scroll-y="true" style="background-color: white;">
+			<view class="answer-card">
+					<view class="card-header">
+						<text class="card-title">答题卡</text>
+					</view>
+					<view class="card-list">
+						<view class="card-item" v-for="(item,index) in answerMap" :key="index"
+							@click="jumpToQuestion(item.qid)" 
+							:class="{right_css: isRight(item),wrong_css: isWrong(item) }">
+							<text class="card-num">{{ index + 1 }}</text>
+						</view>
+					</view>
 			</view>
-			<view class="card-list">
-			<view class="card-item" v-for="(item,index) in answerMap" :key="index"
-				@click="jumpToQuestion(item.qid)" 
-				:class="{right_css: isRight(item),wrong_css: isWrong(item) }">
-				<text class="card-num">{{ index + 1 }}</text>
-			</view>
-			</view>
-		</view>
+		</scroll-view>
 	</uni-popup>
 </template>
 
@@ -171,11 +184,13 @@ function getQuestion(userExamId,questionId){
 				isCorrect.value = res.data.is_correct
 			}else{
 				hasSubmitted.value = false
-				//若是单选题，则初始化为null,多选题则初始化为[]
+				//若是单选题，判断题，则初始化为null,多选题则初始化为[]
 				if(currentQuestion.value.type == 1){
 					selected_option_ids.value = null
 				}else if (currentQuestion.value.type == 2){
 					selected_option_ids.value = []
+				}else if (currentQuestion.value.type == 3){
+					selected_option_ids.value = null
 				}
 			}
 		}
@@ -215,8 +230,8 @@ function submitAnswer() {
 // 选项改变时,根据题目类型，处理选中的选项ID。
 function handleCheckboxChange(e,question_type) {
 	let select_array = new Array()
-	if (question_type == 1) {
-		//单选时。将选中的选项id，转换为数组
+	if (question_type == 1 || question_type == 3) {
+		//单选题，判断题时。将选中的选项id，转换为数组
 		select_array.push(e.detail.value)
 		selected_option_ids.value = select_array
 	}else{
@@ -525,12 +540,9 @@ function isWrong(item) {
 	opacity: 0.5;
 }
 
-
 .answer-card {
-  background-color: #fff;
-  border-radius: 20rpx 20rpx 0 0;
   padding: 30rpx;
-  max-height: 80vh;
+  max-height: 60vh;
 }
 .card-header {
 	display: flex;

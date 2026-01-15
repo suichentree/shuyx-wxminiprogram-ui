@@ -2,9 +2,6 @@
 	<scroll-view>
 		<view v-for="(item,index) in examList" style="display: flex;flex-direction: column;">
 			<view style="display:flex;flex-direction:row;background-color: white;margin: 10px;">
-				<view style="flex:1;display: flex;">
-					<img src="/static/111.png" style="width:100%;height:auto;border-radius: 5px;"/>
-				</view>
 				<view style="flex:1;display:flex;flex-direction: column;gap:5px;padding: 10px;">
 					<h3>{{item.name}}</h3>
 					<view style="display: flex;gap: 5px;">

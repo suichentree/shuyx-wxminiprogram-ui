@@ -1,6 +1,6 @@
 <template>
 	<view class="page-container">
-		<uni-section title="顺序练习介绍页面" type="line">
+		<uni-section title="介绍" type="line">
 			<uni-list :border="false">
 				<uni-list-item :title="exam_info.name">
 					<template v-slot:footer>
@@ -9,7 +9,7 @@
 				</uni-list-item>
 			</uni-list>
 		</uni-section>
-		<uni-section title="顺序练习历史记录" type="line">
+		<uni-section title="历史记录" type="line">
 			<uni-list :border="false">
 				<uni-list-item v-for="(item,index) in history_list" 
 					:key="item.id"
@@ -38,8 +38,6 @@ let examId = ref(null)
 //获取上一个页面传递的参数
 onLoad((option) => {
 	examId.value = option.examId;
-	
-	examId.value = 1;
 });
 
 
