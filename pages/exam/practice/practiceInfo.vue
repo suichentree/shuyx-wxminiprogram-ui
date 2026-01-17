@@ -67,7 +67,6 @@ function history(){
 }
 
 let userExamId = ref(null)
-let pageNo = ref(null)
 function toStart(){
 	//调用接口，开始/继续顺序练习
 	let params = {user_id:userId.value,exam_id:examId.value}
@@ -75,14 +74,16 @@ function toStart(){
 		console.log(res)
 		if (res.code == 200) {
 			userExamId.value = res.data.user_exam_id
-			pageNo.value = res.data.page_no
-			
 			//跳转到练习页面
 			uni.navigateTo({
 				url: '/pages/exam/practice/practice?userExamId='+userExamId.value
 			})
 		}else{
-			
+			uni.showToast({
+			  title: '请求失败',
+			  icon: 'none',
+			  duration: 2000
+			})
 		}
 	})
 }

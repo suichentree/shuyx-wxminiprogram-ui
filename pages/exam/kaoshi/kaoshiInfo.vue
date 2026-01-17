@@ -4,7 +4,7 @@
 			<uni-list :border="false">
 				<uni-list-item :title="exam_info.name">
 					<template v-slot:footer>
-						<button type="primary" size="mini" @click="toKaoshi">开始考试</button>
+						<button type="primary" size="mini" @click="toStart">开始考试</button>
 					</template>
 				</uni-list-item>
 			</uni-list>
@@ -14,7 +14,7 @@
 				<uni-list-item v-for="(item,index) in history_list" 
 					:border="false" 
 					:title="exam_info.name" 
-					:note="'完成时间 '+item.finish_time" :rightText="'正确率 '+item.score"/>
+					:note="'完成时间 '+item.finish_time" :rightText="'正确率 '+(item.correct_count/item.total_count)*100 + '%' "/>
 			</uni-list>
 		</uni-section>
 	</view>
@@ -63,9 +63,25 @@ function history(){
 	})
 }
 
-function toKaoshi(){
-	uni.navigateTo({
-		url: '/pages/exam/kaoshi/kaoshi?examId='+examId.value
+let userExamId = ref(null)
+function toStart(){
+	//调用接口，开始/继续模拟考试
+	let params = {user_id:userId.value,exam_id:examId.value}
+	kaoshiAPIService.start(params).then((res) => {
+		console.log(res)
+		if (res.code == 200) {
+			userExamId.value = res.data.user_exam_id
+			//跳转到练习页面
+			uni.navigateTo({
+				url: '/pages/exam/kaoshi/kaoshi?userExamId='+userExamId.value
+			})
+		}else{
+			uni.showToast({
+			  title: '请求失败',
+			  icon: 'none',
+			  duration: 2000
+			})
+		}
 	})
 }
 </script>

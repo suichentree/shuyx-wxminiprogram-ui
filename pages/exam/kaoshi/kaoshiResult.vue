@@ -72,7 +72,6 @@ userId.value = 999
 let userExamId = ref(null)
 onLoad((option) => {
 	userExamId.value = option.userExamId;
-	userExamId.value = 101
 });
 
 onMounted(()=>{

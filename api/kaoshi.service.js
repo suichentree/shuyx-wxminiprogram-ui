@@ -12,6 +12,15 @@ const APIResources = {
 	        header: {"Content-Type":"application/json;charset=UTF-8"} 
 		})
 	},
+	//获取题目
+	getQuestion(params) {
+		return request({
+			url: '/mp/exam/kaoshi/getQuestion',
+			method: 'POST',
+			data: params,
+	        header: {"Content-Type":"application/json;charset=UTF-8"} 
+		})
+	},
 	//获取模拟考试记录
 	history(params) {
 		return request({

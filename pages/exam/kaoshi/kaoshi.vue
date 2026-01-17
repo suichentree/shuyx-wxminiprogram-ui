@@ -30,6 +30,15 @@
 						class="option-list"
 					></uni-data-checkbox>
 				</view>
+				<view class="options-container" v-else-if="item.question.type == 3">
+					<uni-data-checkbox 
+						mode="list" 
+						:map="{text:'content',value:'id'}" 
+						:localdata="item.options" 
+						@change="(e)=>{ handleCheckboxChange(e,item.question.id,item.question.type) }"
+						class="option-list"
+					></uni-data-checkbox>
+				</view>
 			</view>
 		</scroll-view>
 	</view>
@@ -42,22 +51,24 @@
 	
 	<!-- 答题卡弹窗 - 优化视觉和交互 -->
 	<uni-popup ref="answerCardPopup" type="bottom" :mask-click="true" class="answer-card-popup">
-	  <view class="answer-card">
-		<view class="card-header">
-		  <text class="card-title">答题卡</text>
-		</view>
-		<view class="card-list">
-		  <view 
-			class="card-item"
-			v-for="(item,index) in question_option_List"
-			:key="item.question.id"
-			@click="jumpToQuestion(index + 1)"
-			:class="{answered: isAnswerd(item.question.id) }"
-		  >
-			<text class="card-num">{{ index + 1 }}</text>
-		  </view>
-		</view>
-	  </view>
+		<scroll-view scroll-y="true" style="background-color: white;">
+			<view class="answer-card">
+				<view class="card-header">
+				  <text class="card-title">答题卡</text>
+				</view>
+				<view class="card-list">
+				  <view 
+					class="card-item"
+					v-for="(item,index) in question_option_List"
+					:key="item.question.id"
+					@click="jumpToQuestion(index + 1)"
+					:class="{answered: isAnswerd(item.question.id) }"
+				  >
+					<text class="card-num">{{ index + 1 }}</text>
+				  </view>
+				</view>
+			</view>
+		</scroll-view>
 	</uni-popup>
 </template>
 
@@ -70,34 +81,28 @@ import { onLoad } from "@dcloudio/uni-app";
 let userId = ref(getApp().globalData.userId)
 userId.value = 999
 
-//测试id
-let examId = ref(null)
-//获取上一个页面传递的参数
-onLoad((option) => {
-	examId.value = option.examId;
-	examId.value = 1;
+// 用户测试记录
+let userExamId = ref(null)
+onLoad((obj) => {
+	userExamId.value = obj.userExamId;
 });
 
 onMounted(()=>{
-	//开始/继续模拟考试
-	start()
+	//获取题目
+	getQuestion(userExamId.value)
 })
 		
-// 用户测试记录
-let userExamId = ref(null)
-let userExamPageNo = ref(null)
-// 问题选项列表
+		
 let question_option_List = ref([])
 //获取题目列表信息和用户测试记录信息
-function start(){
-	let params = {user_id:userId.value,exam_id:examId.value}
-	KaoshiAPIService.start(params).then((res) => {
+function getQuestion(userExamId){
+	//调用接口
+	KaoshiAPIService.getQuestion({user_exam_id:userExamId}).then((res) => {
 		console.log(res)
 		if (res.code == 200) {
 			//获取数据
 			question_option_List.value = res.data.questions
 			userExamId.value = res.data.user_exam_id
-			userExamPageNo.value = res.data.page_no
 		}
 	})
 }
@@ -106,9 +111,9 @@ function start(){
 let userAnswerMap = ref({})
 // 选项改变时,根据题目类型，处理选中的选项ID。
 function handleCheckboxChange(e,question_id,question_type) {
-	if (question_type == 1) {
+	let select_array = new Array()
+	if (question_type == 1 || question_type == 3) {
 		//单选时。将选中的选项id，从整数类型转换为数组类型
-		let select_array = new Array()
 		select_array.push(e.detail.value)
 		userAnswerMap.value[question_id] = select_array
 	}else{
@@ -127,6 +132,8 @@ function openAnswerCard() {
 const jumpToQuestion = (idx) => {
   var anchor = document.getElementById(idx);
   anchor.scrollIntoView({ behavior: 'smooth' }); // 增加平滑滚动
+  //关闭
+  answerCardPopup.value?.close()
 };
 
 //答题卡中题目是否已经作答
@@ -156,6 +163,7 @@ function isAllAnswered() {
 
 //交卷
 function toSubmit(){
+	console.log("userAnswerMap.value",userAnswerMap.value);
 	if (!isAllAnswered()) {
 		uni.showToast({
 		  title: '还有未作答的题目，请先完成所有题目',
@@ -286,7 +294,6 @@ function toSubmit(){
 /* 答题卡按钮 */
 .answer-card-btn {
 	flex: 1;
-	background-color: #f0f2f5;
 	color: #333333;
 	margin-right: 10rpx;
 }
