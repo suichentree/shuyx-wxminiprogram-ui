@@ -5,7 +5,7 @@
 使用uniapp 官方开发工具 HbuilderX 编写
 
 技术栈
-- 使用了vant ui库
+- 使用了uni-ui库
 
 
 

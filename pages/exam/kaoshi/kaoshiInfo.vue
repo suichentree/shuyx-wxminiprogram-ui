@@ -53,7 +53,7 @@ let exam_info = ref({
 
 //获取模拟考试历史记录
 function history(){
-	let params = {user_id:999,exam_id:examId.value}
+	let params = {user_id:userId.value,exam_id:examId.value}
 	kaoshiAPIService.history(params).then((res) => {
 		console.log(res)
 		if (res.code == 200) {
