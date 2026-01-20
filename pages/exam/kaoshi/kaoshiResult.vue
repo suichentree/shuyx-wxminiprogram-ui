@@ -54,7 +54,6 @@
 		<!-- 底部按钮 -->
 		<view class="footer">
 			<button class="btn-secondary" @click="goBack">返回</button>
-			<button class="btn-primary" @click="reviewAnswers">查看解析</button>
 		</view>
 	</view>
 </template>
@@ -111,20 +110,20 @@ function getQuestionTagType(item) {
 
 // 格式化用户答案
 function formatUserAnswer(item) {
-	if(!item.user_answer) return '未作答'
-	if(Array.isArray(item.user_answer)) {
-		return item.user_answer.join('、')
+	if(!item.user_answer_text) return '未作答'
+	if(Array.isArray(item.user_answer_text)) {
+		return item.user_answer_text.join('、')
 	}
-	return item.user_answer
+	return item.user_answer_text
 }
 
 // 格式化正确答案
 function formatCorrectAnswer(item) {
-	if(!item.correct_answer) return '-'
-	if(Array.isArray(item.correct_answer)) {
-		return item.correct_answer.join('、')
+	if(!item.correct_answer_text) return '-'
+	if(Array.isArray(item.correct_answer_text)) {
+		return item.correct_answer_text.join('、')
 	}
-	return item.correct_answer
+	return item.correct_answer_text
 }
 
 // 回到考试列表页面
@@ -134,17 +133,6 @@ function goBack() {
 	})
 }
 
-// 查看解析（跳转到解析页面或展开解析）
-function reviewAnswers() {
-	uni.showToast({
-		title: '解析功能开发中',
-		icon: 'none'
-	})
-	// 可以跳转到解析页面或展开解析内容
-	// uni.navigateTo({
-	//   url: '/pages/exam/kaoshi/kaoshiReview?userExamId=' + userExamId.value
-	// })
-}
 </script>
 <style scoped>
 .page-container {

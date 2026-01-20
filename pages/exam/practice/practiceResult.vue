@@ -21,8 +21,8 @@
 			</view>
 			<view class="stat-divider"></view>
 			<view class="stat-item stat-total">
-				<view class="stat-number">{{ total_count || 0 }}</view>
-				<view class="stat-label">总题数</view>
+				<view class="stat-number">{{ total_count - (error_count + correct_count) || 0 }}</view>
+				<view class="stat-label">未答题数</view>
 			</view>
 		</view>
 		
@@ -34,14 +34,26 @@
 					<view class="question-header">
 						<uni-tag :text="index + 1 + ''" :type="getQuestionTagType(item)" size="mini" />
 						<text class="question-type">{{ item.question_type_name }}</text>
-						<uni-tag :text="item.is_correct === 1 ? '正确' : '错误'" :type="item.is_correct === 1 ? 'success' : 'error'" size="mini" />
+						<!-- 优化：区分未答/正确/错误状态 -->
+						<uni-tag 
+							:text="getAnswerStatusText(item.is_correct)" 
+							:type="getQuestionTagType(item)" 
+							size="mini" 
+						/>
 					</view>
 					<view class="question-content">{{ item.question_name }}</view>
 					<view class="answer-info">
 						<view class="answer-row">
 							<text class="answer-label">您的答案：</text>
-							<text :class="['answer-value', item.is_correct === 1 ? 'correct' : 'error']">{{ formatUserAnswer(item) }}</text>
+							<!-- 优化：未答状态单独样式 -->
+							<text 
+								:class="[
+									'answer-value', 
+									item.is_correct === 1 ? 'correct' : (item.is_correct === -1 ? 'unanswered' : 'error')
+								]"
+							>{{ formatUserAnswer(item) }}</text>
 						</view>
+						<!-- 未答/错误时显示正确答案 -->
 						<view class="answer-row" v-if="item.is_correct !== 1">
 							<text class="answer-label">正确答案：</text>
 							<text class="answer-value correct">{{ formatCorrectAnswer(item) }}</text>
@@ -54,7 +66,6 @@
 		<!-- 底部按钮 -->
 		<view class="footer">
 			<button class="btn-secondary" @click="goBack">返回</button>
-			<button class="btn-primary" @click="reviewAnswers">查看解析</button>
 		</view>
 	</view>
 </template>
@@ -72,7 +83,6 @@ userId.value = 999
 let userExamId = ref(null)
 onLoad((option) => {
 	userExamId.value = option.userExamId;
-	userExamId.value = 101
 });
 
 onMounted(()=>{
@@ -105,9 +115,18 @@ function practiceResult(){
 	})
 }
 
-// 获取题目标签类型
+// 优化：获取题目标签类型（区分未答/正确/错误）
 function getQuestionTagType(item) {
-	return item.is_correct === 1 ? 'success' : 'error'
+	if (item.is_correct === 1) return 'success' // 正确-绿色
+	if (item.is_correct === -1) return 'warning' // 未答-黄色
+	return 'error' // 错误-红色
+}
+
+// 优化：获取答题状态文本
+function getAnswerStatusText(isCorrect) {
+	if (isCorrect === 1) return '正确'
+	if (isCorrect === -1) return '未答'
+	return '错误'
 }
 
 // 格式化用户答案
@@ -137,14 +156,8 @@ function goBack() {
 	uni.navigateBack()
 }
 
-// 查看解析（跳转到解析页面或展开解析）
-function reviewAnswers() {
-	uni.showToast({
-		title: '解析功能开发中',
-		icon: 'none'
-	})
-}
 </script>
+
 <style scoped>
 .page-container {
 	display: flex;
@@ -297,13 +310,21 @@ function reviewAnswers() {
 	flex: 1;
 }
 
+/* 正确样式 */
 .answer-value.correct {
 	color: #67c23a;
 	font-weight: 500;
 }
 
+/* 错误样式 */
 .answer-value.error {
 	color: #f56c6c;
+	font-weight: 500;
+}
+
+/* 优化：新增未答样式 */
+.answer-value.unanswered {
+	color: #e6a23c;
 	font-weight: 500;
 }
 
@@ -336,5 +357,12 @@ function reviewAnswers() {
 .btn-secondary {
 	background-color: #f0f0f0;
 	color: #606266;
+}
+
+/* 兼容uni-tag的warning样式（未答标签） */
+:deep(.uni-tag--warning) {
+	background-color: #fdf6ec;
+	color: #e6a23c;
+	border-color: #fbbf24;
 }
 </style>
