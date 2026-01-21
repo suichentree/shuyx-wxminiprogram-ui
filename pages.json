@@ -59,6 +59,18 @@
 			"style": {
 				"navigationBarTitleText": "模拟考试结果"
 			}
+		},
+		{
+			"path": "pages/login/login",
+			"style": {
+				"navigationBarTitleText": "登录页面"
+			}
+		},
+		{
+			"path": "pages/exam/errorPractice/errorPractice",
+			"style": {
+				"navigationBarTitleText": "错题练习"
+			}
 		}
 	],
 	"globalStyle": {
@@ -83,7 +95,7 @@
 				"pagePath": "pages/exam/exam",
 				"iconPath": "/static/tab_bar_img/component.png",
 				"selectedIconPath": "/static/tab_bar_img/component_cur.png",
-				"text": "测试"
+				"text": "题库"
 			}, {
 				"pagePath": "pages/me/me",
 				"iconPath": "/static/tab_bar_img/me.png",

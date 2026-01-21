@@ -3,9 +3,9 @@ import request from './request.js'
 
 // 创建资源访问对象
 const APIResources = {
-	wxUserLogin (params) {
+	getUserInfo (params) {
 		return request({
-			url: '/mp/user/wxUserLogin',
+			url: '/mp/user/getUserInfo',
 			method: 'POST',
 			data: params,
 	        header: {"Content-Type":"application/json;charset=UTF-8"} 

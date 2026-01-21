@@ -7,6 +7,11 @@ const timeout = 5000
 
 //封装request请求方法
 const request = (obj) => {
+	//从本地缓存中获取token并添加到请求头中
+	let token = uni.getStorageSync('token')
+	if(token != null || token != undefined || token != ''){
+		obj.header['Authorization'] = `Bearer ` + token;
+	}
 	return new Promise((resolve, reject) => {
 		uni.request({
 			url: API_BASE_URL + obj.url,
@@ -27,12 +32,10 @@ const request = (obj) => {
 								content: "请登录",
 								showCancel: false,
 								success() {
-									//2秒跳转到首页
-									setTimeout(() => {
-										uni.navigateTo({
-											url: "/pages/index/index",
-										})
-									}, 2000);
+									//跳转到登录页面
+									uni.navigateTo({
+										url: "/pages/login/login",
+									})
 								},
 							});
 							break;
@@ -43,10 +46,6 @@ const request = (obj) => {
 							})
 							break;
 						default:
-							uni.showToast({
-								title: '请重试...',
-								duration: 2000,
-							})
 							break;
 					}
 				}

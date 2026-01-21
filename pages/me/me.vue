@@ -23,19 +23,25 @@
 	<!-- 列表 -->
 	<view style="padding:26px 16px;">
 		<uni-list >
-			<uni-list-item title="微信登录" :show-extra-icon="true" :extra-icon="{color: 'red',size: '25',type: 'star-filled'} ">
+			<!-- <uni-list-item title="微信登录" :show-extra-icon="true" :extra-icon="{color: 'red',size: '25',type: 'star-filled'} ">
 				<template v-slot:footer>
-					<button type="primary" size="mini" v-if=" userInfo.id == undefined " @click="wxLogin" style="background-image: linear-gradient(45deg, #39b54a, #8dc63f);box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);">点击登录</button>
+					<button type="primary" size="mini" v-if=" userId == null " @click="wxLogin" style="background-image: linear-gradient(45deg, #39b54a, #8dc63f);box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);">点击登录</button>
+					<button type="primary" size="mini" v-else style="background-image: linear-gradient(45deg, #39b54a, #8dc63f);box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);">已登录</button>
+				</template>
+			</uni-list-item> -->
+			<uni-list-item title="账户登录" :show-extra-icon="true" :extra-icon="{color: 'red',size: '25',type: 'star-filled'} ">
+				<template v-slot:footer>
+					<button type="primary" size="mini" v-if=" userId == '' " @click="toLogin" style="background-image: linear-gradient(45deg, #39b54a, #8dc63f);box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);">点击登录</button>
 					<button type="primary" size="mini" v-else style="background-image: linear-gradient(45deg, #39b54a, #8dc63f);box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);">已登录</button>
 				</template>
 			</uni-list-item>
 			<uni-list-item title="个人信息"  link="navigateTo" to="/pages/userinfo/userinfo" :show-extra-icon="true" :extra-icon="{color: 'orange',size: '25',type: 'contact'} "/>
 			<uni-list-item title="消息" :show-extra-icon="true" :extra-icon="{color: 'green',size: '25',type: 'chat'} " showArrow/>
-			<uni-list-item title="测试记录" :show-extra-icon="true" :extra-icon="{color: 'gray',size: '25',type: 'wallet'} " showArrow/>
 			<uni-list-item title="意见反馈" :show-extra-icon="true" :extra-icon="{color: 'purple',size: '25',type: 'compose'} " showArrow/>
 			<uni-list-item title="二维码" :show-extra-icon="true" :extra-icon="{color: '#009300',size: '25',type: 'pyq'} " showArrow/>
 			<uni-list-item title="设置" :show-extra-icon="true" :extra-icon="{color: '#000000',size: '25',type: 'gear'} " showArrow/>
 			<uni-list-item title="版本号" :show-extra-icon="true" :extra-icon="{color: '#bf0000',size: '25',type: 'info'} " :rightText="version_text"/>
+			<uni-list-item title="注销" :show-extra-icon="true" :extra-icon="{color: '#55aaff',size: '25',type: 'info'} " clickable  @click="toLogout"/>
 		</uni-list>
 	</view>
 </template>
@@ -43,6 +49,7 @@
 <script setup>
 import { ref,watch, onMounted, provide } from 'vue'
 import UserAPIService from '@/api/user.service.js'
+import LoginAPIService from '@/api/login.service.js'
 
 
 // 用户默认头像
@@ -51,12 +58,12 @@ let user_default_image = ref("/static/default_user_head.jpg")
 let version_text = ref(getApp().globalData.version)
 // 用户信息
 let userInfo = ref(getApp().globalData.userInfo)
+let userId = ref(getApp().globalData.userId)
 
 //监听userInfo
 watch(userInfo,(newValue, oldValue) => {
     newValue = oldValue
 },{ deep: true })
-
 
 let extraIcon = ref({
 	color: '#4cd964',
@@ -70,8 +77,26 @@ onMounted(() => {
 	
 })
 
-function search(){
-	
+function toLogout(){
+	console.log("注销....")
+	LoginAPIService.Logout().then((res) => {
+		if (res.code == 200) {
+			//清理本地缓存
+			uni.clearStorage()
+			//导航到login页面
+			uni.navigateTo({
+				url:"/pages/login/login"
+			})
+		}
+	}).catch(err => {
+		console.error('注销失败：', err);
+	})
+}
+
+function toLogin(){
+	uni.navigateTo({
+		url:"/pages/login/login"
+	})
 }
 
 function wxLogin(){
@@ -86,58 +111,30 @@ function wxLogin(){
 		let params = {"code":loginRes.code}
 		UserAPIService.wxUserLogin(params).then((res) => {
 			if (res.code == 200) {
+				//本地缓存
+				uni.setStorage({key:"token",data:res.data.token})
+				uni.setStorage({key:"userId",data:res.data.userInfo.id})
+				uni.setStorage({key:"userName",data:res.data.userInfo.name})
+				uni.setStorage({key:"userInfo",data:res.data.userInfo})
+				
 				if (res.data.isFirstLogin == 0) {
 					//不是第一次登录
-					
-					//设置全局变量
-					getApp().globalData.userInfo = res.data.userInfo;
-					getApp().globalData.userId = res.data.userInfo.id;
-					getApp().globalData.userName = res.data.userInfo.name;
-					
 					//刷新页面
 					uni.reLaunch({
 					    url: '/pages/me/me'
 					})
-					
 				}else{
 					//是第一次登录，需要跳转到个人信息页面。补全个人信息
 					uni.navigateTo({
 						url: '/pages/userinfo/userinfo?userId='+res.data.userInfo.id
 					})
+					//刷新页面
+					uni.reLaunch({
+					    url: '/pages/me/me'
+					})
 				}
 			}
 		})
-		
-		// 获取用户信息
-		// uni.getUserInfo({
-		//   provider: 'weixin',
-		//   success: function (infoRes) {
-		// 	console.log('用户昵称为：' + infoRes.userInfo.nickName);
-		//   }
-		// });
-		
-		// 请求
-		// uni.request({
-		//   url: getApp().globalData.baseURL + "/wx/getOpenId",
-		//   method:'GET',
-		//   data:{
-		// 	  js_code:res.code,
-		//   },
-		//   success: (res) => {
-		// 	//本地缓存
-		// 	uni.setStorage({
-		// 		key:"openId",
-		// 		data:res.data.data.openid
-		// 	})
-		//   },
-		//   fail: (err) => {
-		//     uni.showToast({
-		//     	icon:"fail",
-		//     	title: 'openid获取失败',
-		//     	duration: 2000
-		//     });
-		//   },
-		// });
 	  },fail() {
 		//获取code需要先在mainfest.json中设置微信小程序的appid
 		uni.showToast({

@@ -11,77 +11,73 @@
 		</view>
 		
 		<!-- 题目内容区域 -->
-		<scroll-view class="content" scroll-y="true">
-			<view class="question-item" v-if="currentQuestion">
-				<view class="question-header">
-					<uni-tag :text="page_no + 1 + ''" type="primary" size="mini" />
-					<text class="question-type">{{ currentQuestion.type_name }}</text>
+		<view class="question-item" v-if="currentQuestion">
+			<view class="question-header">
+				<uni-tag :text="page_no + 1 + ''" type="primary" size="mini" />
+				<text class="question-type">{{ currentQuestion.type_name }}</text>
+			</view>
+			<view class="question-content">{{ currentQuestion.name }}</view>
+			
+			<!-- 选项列表 -->
+			<view class="options-list">
+				<view v-if="currentQuestion.type == 1">
+					<!-- 单选 -->
+					<uni-data-checkbox 
+						mode="list" 
+						:map="{text:'content',value:'id'}" 
+						:localdata="currentOptions" 
+						:value="selected_option_ids"
+						:disabled="hasSubmitted"
+						@change="(e)=>{ handleCheckboxChange(e,currentQuestion.type) }"
+					></uni-data-checkbox>
 				</view>
-				<view class="question-content">{{ currentQuestion.name }}</view>
-				
-				<!-- 选项列表 -->
-				<view class="options-list">
-					<view v-if="currentQuestion.type == 1">
-						<!-- 单选 -->
-						<uni-data-checkbox 
-							mode="list" 
-							:map="{text:'content',value:'id'}" 
-							:localdata="currentOptions" 
-							:value="selected_option_ids"
-							:disabled="hasSubmitted"
-							@change="(e)=>{ handleCheckboxChange(e,currentQuestion.type) }"
-						></uni-data-checkbox>
-					</view>
-					<view v-else-if="currentQuestion.type == 2">
-						<!-- 多选 -->
-						<uni-data-checkbox 
-							mode="list" 
-							:map="{text:'content',value:'id'}" 
-							multiple
-							:localdata="currentOptions" 
-							:value="selected_option_ids"
-							:disabled="hasSubmitted"
-							@change="(e)=>{ handleCheckboxChange(e,currentQuestion.type) }"
-						></uni-data-checkbox>
-					</view>
-					<view v-else-if="currentQuestion.type == 3">
-						<!-- 判断题 -->
-						<uni-data-checkbox 
-							mode="list" 
-							:map="{text:'content',value:'id'}" 
-							:localdata="currentOptions" 
-							:value="selected_option_ids"
-							:disabled="hasSubmitted"
-							@change="(e)=>{ handleCheckboxChange(e,currentQuestion.type) }"
-						></uni-data-checkbox>
-					</view>
+				<view v-else-if="currentQuestion.type == 2">
+					<!-- 多选 -->
+					<uni-data-checkbox 
+						mode="list" 
+						:map="{text:'content',value:'id'}" 
+						multiple
+						:localdata="currentOptions" 
+						:value="selected_option_ids"
+						:disabled="hasSubmitted"
+						@change="(e)=>{ handleCheckboxChange(e,currentQuestion.type) }"
+					></uni-data-checkbox>
 				</view>
-				
-				<!-- 若已答题，则显示答题结果 -->
-				<view class="result-tip" v-if="hasSubmitted">
-					<!-- 判断是否答对 -->
-					<view :class="['tip-content', isCorrect ? 'tip-correct' : 'tip-error']">
-						<uni-icons :type="isCorrect ? 'checkmarkempty' : 'closeempty'" :color="isCorrect ? '#67c23a' : '#f56c6c'" size="20"></uni-icons>
-						<text>{{ isCorrect ? '回答正确' : '回答错误' }}</text>
-					</view>
-					<!--显示正确答案 -->
-					<view class="correct-answer-tip">
-						<text class="answer-label">正确答案: \n</text>
-						<text class="answer-value">{{ formatCorrectAnswer() }}</text>
-					</view>
+				<view v-else-if="currentQuestion.type == 3">
+					<!-- 判断题 -->
+					<uni-data-checkbox 
+						mode="list" 
+						:map="{text:'content',value:'id'}" 
+						:localdata="currentOptions" 
+						:value="selected_option_ids"
+						:disabled="hasSubmitted"
+						@change="(e)=>{ handleCheckboxChange(e,currentQuestion.type) }"
+					></uni-data-checkbox>
 				</view>
 			</view>
-		</scroll-view>
+			
+			<!-- 若已答题，则显示答题结果 -->
+			<view class="result-tip" v-if="hasSubmitted">
+				<!-- 判断是否答对 -->
+				<view :class="['tip-content', isCorrect ? 'tip-correct' : 'tip-error']">
+					<uni-icons :type="isCorrect ? 'checkmarkempty' : 'closeempty'" :color="isCorrect ? '#67c23a' : '#f56c6c'" size="20"></uni-icons>
+					<text>{{ isCorrect ? '回答正确' : '回答错误' }}</text>
+				</view>
+				<!--显示正确答案 -->
+				<view class="correct-answer-tip">
+					<text class="answer-label">正确答案: \n</text>
+					<text class="answer-value">{{ formatCorrectAnswer() }}</text>
+				</view>
+			</view>
+		</view>
 		
 		<!-- 上下题按钮 -->
 		<view class="page-nav">
 			<button class="nav-btn prev-btn" :disabled="page_no <= 0" @click="prevQuestion">
-				<uni-icons type="left" size="20"></uni-icons>
 				<text>上一题</text>
 			</button>
 			<button class="nav-btn next-btn" :disabled="page_no >= total_count-1" @click="nextQuestion">
 				<text>下一题</text>
-				<uni-icons type="right" size="20"></uni-icons>
 			</button>
 		</view>
 		
@@ -89,7 +85,7 @@
 		<view class="footer">
 			<button style="flex:1;" @click="openAnswerCard">答题卡</button>
 			<button style="flex:3;" v-if="isFinished"  @click="toResult">分析结果</button>
-			<button style="flex:3;" v-else :disabled="hasSubmitted" @click="submitAnswer">提交答案</button>
+			<button style="flex:3;" type="primary" v-else :disabled="hasSubmitted" @click="submitAnswer">提交答案</button>
 		</view>
 	</view>
 
@@ -125,6 +121,12 @@ userId.value = 999
 let userExamId = ref(null)
 onLoad((obj) => {
 	userExamId.value = obj.userExamId;
+	if (!userExamId.value) {
+		uni.showToast({
+			title: '缺少用户测试ID',
+			icon: 'error'
+		});
+	}
 });
 
 onMounted(()=>{
@@ -205,6 +207,13 @@ function submitAnswer() {
 			icon: 'none'
 		})
 	}else{
+		// 本地判断答案是否正确
+		let isAnswerCorrect = checkAnswerCorrectness()
+		
+		// 更新本地状态
+		hasSubmitted.value = true
+		isCorrect.value = isAnswerCorrect
+		
 		//构建参数
 		let params = {
 			user_exam_id: userExamId.value,
@@ -214,10 +223,7 @@ function submitAnswer() {
 		}
 		practiceAPIService.submitAnswer(params).then((res) => {
 			console.log(res)
-			if(res.code == 200) {
-				//重新获取该题目信息
-				getQuestion(userExamId.value)
-			} else {
+			if(res.code != 200) {
 				uni.showToast({
 					title: '提交失败：' + res.message,
 					icon: 'none'
@@ -239,6 +245,23 @@ function handleCheckboxChange(e,question_type) {
 		selected_option_ids.value = e.detail.value
 	}
 }
+
+// 本地验证答案正确性
+function checkAnswerCorrectness() {
+	// 获取正确选项ID集合
+	let correctOptionIds = currentOptions.value
+		.filter(option => option.is_right === 1)
+		.map(option => option.id)
+	
+	// 长度不同直接错误
+	if(selected_option_ids.value.length !== correctOptionIds.length){
+		return false
+	}else{
+		// 检查每个选项是否都在正确答案中
+		return selected_option_ids.value.every(id => correctOptionIds.includes(id))
+	}
+}
+
 
 // 格式化正确答案显示
 function formatCorrectAnswer() {
@@ -347,6 +370,9 @@ function isWrong(item) {
 	flex-direction: column;
 	height: 100vh;
 	background-color: #f5f5f5;
+	/* 给内容区域添加底部内边距，避免被固定的底部按钮遮挡 */
+	padding-bottom: 120rpx;
+	box-sizing: border-box;
 }
 
 /* 进度条 */
@@ -415,68 +441,89 @@ function isWrong(item) {
 }
 
 /* 答题结果提示 */
+/* 答题结果提示区域美化 */
 .result-tip {
-	margin-top: 30rpx;
-	padding: 20rpx;
-	border-radius: 8rpx;
+  margin-top: 30rpx;
+  padding: 24rpx;
+  border-radius: 12rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+  border: 1px solid transparent;
+  transition: all 0.3s ease;
 }
 
+/* 正确/错误提示行样式 */
 .tip-content {
-	display: flex;
-	align-items: center;
-	gap: 10rpx;
-	font-size: 28rpx;
-	font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  font-size: 30rpx;
+  font-weight: 500;
+  padding: 16rpx 20rpx;
+  border-radius: 8rpx;
+  margin-bottom: 20rpx;
 }
 
+/* 正确状态样式 */
 .tip-correct {
-	color: #67c23a;
-	background-color: #f0f9ff;
+  color: #36b37e;
+  background-color: #f6ffed;
+  border-color: #eaffea;
 }
 
+/* 错误状态样式 */
 .tip-error {
-	color: #f56c6c;
-	background-color: #fef0f0;
+  color: #ff5630;
+  background-color: #fff2f0;
+  border-color: #ffe8e5;
 }
 
-/* 正确答案提示 */
+/* 正确答案提示区域 */
 .correct-answer-tip {
-	margin-top: 20rpx;
-	padding: 20rpx;
-	background-color: #f0f9ff;
-	border-radius: 8rpx;
-	font-size: 26rpx;
+  padding: 22rpx 24rpx;
+  background-color: #f0f7ff;
+  border-radius: 8rpx;
+  border-left: 4rpx solid #409eff;
+  font-size: 28rpx;
+  line-height: 1.8;
 }
 
+/* 答案标签样式 */
 .answer-label {
-	color: #606266;
-	margin-right: 10rpx;
+  color: #409eff;
+  font-weight: 600;
+  margin-right: 10rpx;
 }
 
+/* 答案内容样式 */
 .answer-value {
-	color: #67c23a;
-	font-weight: 500;
+  color: #333;
+  white-space: pre-line; /* 保留换行符 */
+  padding-left: 10rpx;
 }
 
 /* 上下题按钮 */
 .page-nav {
 	display: flex;
+	flex-direction: column;
 	gap: 24rpx;
 	padding: 0 24rpx 24rpx;
+	
 }
 .nav-btn {
-	flex: 1;
-	height: 92rpx;
-	line-height: 92rpx;
-	border-radius: 8rpx;
-	font-size: 30rpx;
-	font-weight: 500;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: 12rpx;
-	transition: all 0.2s ease;
-	border: none;
+	/* 每个按钮占满一行宽度 */
+	  width: 80%;
+	  /* 移除flex:1，改用width:100% */
+	  height: 92rpx;
+	  line-height: 92rpx;
+	  border-radius: 8rpx;
+	  font-size: 30rpx;
+	  font-weight: 500;
+	  display: flex;
+	  align-items: center;
+	  justify-content: center;
+	  gap: 12rpx;
+	  transition: all 0.2s ease;
+	  border: none;
 }
 .prev-btn {
 	background-color: #ffffff;
@@ -498,11 +545,20 @@ function isWrong(item) {
 
 /* 底部按钮 */
 .footer {
-	display: flex;
-	gap: 20rpx;
-	padding: 20rpx;
-	background-color: #fff;
-	box-shadow: 0 -2rpx 10rpx rgba(0,0,0,0.05);
+	/* 固定在底部 */
+	  position: fixed;
+	  bottom: 0;
+	  left: 0;
+	  right: 0;
+	  display: flex;
+	  gap: 20rpx;
+	  padding: 20rpx;
+	  background-color: #fff;
+	  box-shadow: 0 -2rpx 10rpx rgba(0,0,0,0.05);
+	  /* 确保在最上层 */
+	  z-index: 99;
+	  /* 防止内容溢出 */
+	  box-sizing: border-box;
 }
 
 .btn-prev, .btn-submit, .btn-next {
@@ -580,6 +636,89 @@ function isWrong(item) {
 .wrong_css {
 	background-color: #ff3b30;
 	border-color: #ff3b30;
+}
+
+
+/* 全局基础优化 */
+.page-container {
+  background-color: #f8fafc; /* 更柔和的背景色 */
+}
+
+/* 进度条美化 */
+.progress-bar {
+  background-color: #fff;
+  padding: 20rpx 30rpx;
+  border-bottom: 1px solid #f0f0f0; /* 增加底部边框区分区域 */
+}
+.progress-text {
+  font-size: 28rpx;
+  color: #4b5563; /* 更深的文字色提升可读性 */
+  font-weight: 500;
+}
+
+/* 题目卡片美化 */
+.question-item {
+  background-color: #fff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin: 20rpx; /* 增加外间距 */
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05); /* 轻微阴影增强层次感 */
+}
+.question-content {
+  font-size: 34rpx;
+  color: #1e293b;
+  line-height: 1.8;
+  margin-bottom: 40rpx;
+}
+
+/* 选项列表优化 */
+::v-deep .uni-data-checkbox__list {
+  gap: 15rpx; /* 选项间距 */
+}
+::v-deep .uni-data-checkbox__item {
+  padding: 25rpx;
+  border-radius: 10rpx;
+  transition: background-color 0.2s;
+}
+::v-deep .uni-data-checkbox__item:hover {
+  background-color: #f1f5f9; /* 悬停背景色 */
+}
+
+/* 按钮美化 */
+.nav-btn {
+  width: 80%;
+  height: 92rpx;
+  line-height: 92rpx;
+  border-radius: 12rpx; /* 更圆润的边角 */
+  font-size: 32rpx;
+  transition: all 0.3s ease;
+}
+.next-btn {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); /* 更饱和的蓝色 */
+}
+.next-btn:active:not(:disabled) {
+  transform: scale(0.98);
+  box-shadow: 0 2rpx 8rpx rgba(37, 99, 235, 0.3);
+}
+
+/* 答题卡美化 */
+.card-item {
+  width: 80rpx;
+  height: 80rpx;
+  line-height: 80rpx;
+  border-radius: 8rpx;
+  transition: transform 0.2s;
+}
+.card-item:hover {
+  transform: scale(1.05); /* 悬停放大效果 */
+}
+.right_css {
+  background-color: #10b981; /* 更柔和的绿色 */
+  color: white; /* 白色文字提升对比 */
+}
+.wrong_css {
+  background-color: #ef4444; /* 更柔和的红色 */
+  color: white;
 }
 
 </style>

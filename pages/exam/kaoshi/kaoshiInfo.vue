@@ -10,11 +10,18 @@
 			</uni-list>
 		</uni-section>
 		<uni-section title="历史记录" type="line">
-			<uni-list :border="false">
+			<!-- 优化空状态-->
+			<view v-if="history_list.length === 0">
+			  <text>暂无考试记录，快去完成第一次模拟考试吧～</text>
+			</view>
+			<uni-list :border="false" v-else>
 				<uni-list-item v-for="(item,index) in history_list" 
 					:border="false" 
 					:title="exam_info.name" 
-					:note="'完成时间 '+item.finish_time" :rightText="'正确率 '+(item.correct_count/item.total_count)*100 + '%' "/>
+					:note="'完成时间 '+item.finish_time" :rightText="'正确率 '+(item.correct_count/item.total_count)*100 + '%' "
+					rightText="查看详情"
+					@click="viewResult(item.id)"
+					/>
 			</uni-list>
 		</uni-section>
 	</view>
@@ -36,12 +43,10 @@ onLoad((option) => {
 	examId.value = option.examId;
 });
 
-
 onMounted(()=>{
 	history()
 })
 		
-
 // 历史列表
 let history_list = ref([])
 // 模拟考试信息
@@ -83,6 +88,25 @@ function toStart(){
 			})
 		}
 	})
+}
+
+// 计算正确率（容错处理：避免0/0或null的情况）
+function getAccuracy(item) {
+  const correct = Number(item.correct_count) || 0
+  const total = Number(item.total_count) || 0
+  if (total === 0) return '0.0'
+  return (correct / total * 100).toFixed(1)
+}
+
+// 跳转到结果页
+function viewResult(item) {
+  if (item.finish_time == null) {
+    uni.showToast({ title: '考试未完成', icon: 'none' })
+    return
+  }
+  uni.navigateTo({
+    url: `/pages/exam/kaoshi/kaoshiResult?userExamId=${item.id}`
+  })
 }
 </script>
 <style scoped>

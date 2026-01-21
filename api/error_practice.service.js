@@ -3,9 +3,10 @@ import request from './request.js'
 
 // 创建资源访问对象
 const APIResources = {
-	wxUserLogin (params) {
+	//获取题目
+	getQuestion(params) {
 		return request({
-			url: '/mp/user/wxUserLogin',
+			url: '/mp/exam/errorPractice/getQuestion',
 			method: 'POST',
 			data: params,
 	        header: {"Content-Type":"application/json;charset=UTF-8"} 

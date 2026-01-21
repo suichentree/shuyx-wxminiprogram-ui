@@ -65,7 +65,6 @@ import { onLoad } from "@dcloudio/uni-app";
 
 //用户id
 let userId = ref(getApp().globalData.userId)
-userId.value = 999
 
 //测试id
 let userExamId = ref(null)
