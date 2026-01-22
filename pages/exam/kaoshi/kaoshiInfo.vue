@@ -18,10 +18,11 @@
 				<uni-list-item v-for="(item,index) in history_list" 
 					:border="false" 
 					:title="exam_info.name" 
-					:note="'完成时间 '+item.finish_time" :rightText="'正确率 '+(item.correct_count/item.total_count)*100 + '%' "
+					:note="`完成时间 ${item.finish_time || '无'} | 正确率 ${getAccuracy(item)}%`"
 					rightText="查看详情"
-					@click="viewResult(item.id)"
-					/>
+					clickable
+					@click="viewResult(item)">
+					</uni-list-item>
 			</uni-list>
 		</uni-section>
 	</view>

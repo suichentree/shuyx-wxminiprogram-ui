@@ -254,13 +254,9 @@ function openAnswerCard() {
 }
 
 function jumpToQuestion(idx) {
-	// 兼容H5和小程序的滚动方式
-	uni.createSelectorQuery().select(`#${idx}`).boundingClientRect(data => {
-		uni.pageScrollTo({
-			scrollTop: data.top + uni.pageScrollGetScrollTop() - 20,
-			duration: 300
-		});
-	}).exec();
+	var anchor = document.getElementById(idx);
+	anchor.scrollIntoView({ behavior: 'smooth' }); // 增加平滑滚动
+	//关闭
 	answerCardPopup.value?.close()
 }
 

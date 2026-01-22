@@ -72,31 +72,39 @@
 
 <script setup>
 import { ref, onMounted, provide } from 'vue'
+import UserAPIService from '@/api/user.service.js'
 
 // 用户信息
-let userInfo = ref({})
+let userId = ref(getApp().globalData.userId)
+
 // onMounted生命周期
 onMounted(() => {
 	//若已登录
-	if (getApp().globalData.userId != undefined){
-		userInfo.value = getApp().globalData.userInfo
-		console.log(userInfo.value)
-		
-		name_value.value = userInfo.value.name
-		gender_index.value = userInfo.value.gender
-		email_value.value = userInfo.value.email
-		phone_value.value = userInfo.value.phone
-		
-		 //将获取的地址信息按字符分割，并赋值到address_value
-		let address_arrays = userInfo.value.address.split(",");
-		address_value.value[0] = address_arrays[0];
-		address_value.value[1] = address_arrays[1];
-		address_value.value[2] = address_arrays[2];
+	if (userId.value != undefined){
+		let aaa = userId.value * 1
+		getUserInfo(aaa)
 	}else{
-		
+		uni.showToast("请先登录")
 	}
 	
 })
+
+// 获取用户信息
+function getUserInfo(user_Id){
+	UserAPIService.getUserInfo({userId:user_Id}).then((res) => {
+		console.log(res)
+		if (res.code == 200) {
+			name_value.value = res.data.name
+			email_value.value = res.data.email
+			phone_value.value = res.data.phone
+			gender_index.value = res.data.gender
+			age_index.value = res.data.age
+			address_value.value = res.data.address
+		} else {
+			uni.showToast("获取用户信息失败")
+		}
+	})
+}
 
 // 用户默认头像
 let user_default_image = ref("/static/default_user_head.jpg")
@@ -155,11 +163,25 @@ function dialogInputConfirm3(val) {
 
 
 function toSave(){
-	cosnole.log("save")
+	UserAPIService.saveUserInfo({
+		id: userId.value,
+		nick_name: name_value.value,
+		phone: phone_value.value,
+		email: email_value.value
+	}).then((res) => {
+		console.log(res)
+		if (res.code == 200) {
+			uni.showToast("保存成功")
+		}else{
+			uni.showToast("保存失败")
+		}
+	})
 }
 
 function toBack(){
-	uni.navigateBack()
+	uni.switchTab({
+		url: '/pages/me/me'
+	})
 }
 
 </script>

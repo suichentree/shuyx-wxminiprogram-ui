@@ -20,7 +20,7 @@
 						:key="item.id"
 						:border="false" 
 						:title="exam_info.name" 
-						:note="'已答：'+item.answered_count+' 未答：'+item.unanswered_count+'完成时间 ' + (item.finish_time || '未完成')" 
+						:note="'已答:'+item.answered_count+' | 未答:'+item.unanswered_count+' | 完成时间 ' + (item.finish_time || '未完成')" 
 						:rightText="'正确率 ' + (item.accuracy_rate || 0) + '%'"
 						@click="viewResult(item.id)"
 					/>

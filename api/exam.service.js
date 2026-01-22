@@ -7,9 +7,9 @@ const APIResources = {
 	getExamList (params) {
 		return request({
 			url: '/mp/exam/getExamList',
-			method: 'GET',
+			method: 'POST',
 			data: params,
-	        header: {"Content-Type":"application/x-www-form-urlencoded"} 
+	        header: {"Content-Type":"application/json;charset=UTF-8"} 
 		})
 	},
 	//获取问题列表

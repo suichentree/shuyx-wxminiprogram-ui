@@ -15,7 +15,7 @@
 		{
 			"path": "pages/exam/exam",
 			"style": {
-				"navigationBarTitleText": "测试"
+				"navigationBarTitleText": "题库中心"
 			}
 		},
 		{

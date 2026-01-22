@@ -57,15 +57,10 @@
           <text class="forgot-password" @click="forgotPassword">忘记密码?</text>
         </view>
         
-		<view @click="submitLogin" class="form-btn" style="text-align: center;padding: 10px;background: linear-gradient(135deg, #667eea 0%, #736da2 100%);">
-		  <uni-button 
-			type="primary" 
-			size="default" 
-			:loading="isLoading"
-			class="custom-login-btn"
-		  >
+		<view @click="submitLogin" style="text-align: center;padding: 10px;">
+		  <button type="primary" size="default" >
 			登录
-		  </uni-button>
+		  </button>
 		</view>
       </view>
       <!-- 底部链接 -->
@@ -82,15 +77,15 @@ import { ref, reactive } from 'vue'
 import LoginAPIService from '@/api/login.service.js'
 
 // 表单数据
-const formData = reactive({
+let formData = reactive({
   username: '',
   password: ''
 });
 
 // 状态变量
-const showPassword = ref(false);
-const rememberMe = ref(false);
-const isLoading = ref(false);
+let showPassword = ref(false);
+let rememberMe = ref(false);
+let isLoading = ref(false);
 
 // 方法
 const togglePassword = () => {

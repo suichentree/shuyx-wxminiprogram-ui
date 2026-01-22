@@ -2,6 +2,7 @@
 	<view class="user_head_container">
 		<!-- 头像 -->
 		<image style="width: 100px; height: 100px;border-radius: 50%;" mode="scaleToFill" :src="user_default_image"></image>
+		<text style="font-weight: 700;">{{userName}}</text>
 		<!-- 动图 -->
 		<image src="/static/aaa.gif" mode="scaleToFill" class="gif_wave"></image>
 	</view>
@@ -35,13 +36,13 @@
 					<button type="primary" size="mini" v-else style="background-image: linear-gradient(45deg, #39b54a, #8dc63f);box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);">已登录</button>
 				</template>
 			</uni-list-item>
-			<uni-list-item title="个人信息"  link="navigateTo" to="/pages/userinfo/userinfo" :show-extra-icon="true" :extra-icon="{color: 'orange',size: '25',type: 'contact'} "/>
-			<uni-list-item title="消息" :show-extra-icon="true" :extra-icon="{color: 'green',size: '25',type: 'chat'} " showArrow/>
-			<uni-list-item title="意见反馈" :show-extra-icon="true" :extra-icon="{color: 'purple',size: '25',type: 'compose'} " showArrow/>
-			<uni-list-item title="二维码" :show-extra-icon="true" :extra-icon="{color: '#009300',size: '25',type: 'pyq'} " showArrow/>
-			<uni-list-item title="设置" :show-extra-icon="true" :extra-icon="{color: '#000000',size: '25',type: 'gear'} " showArrow/>
-			<uni-list-item title="版本号" :show-extra-icon="true" :extra-icon="{color: '#bf0000',size: '25',type: 'info'} " :rightText="version_text"/>
-			<uni-list-item title="注销" :show-extra-icon="true" :extra-icon="{color: '#55aaff',size: '25',type: 'info'} " clickable  @click="toLogout"/>
+			<uni-list-item title="个人信息" clickable  link="navigateTo" to="/pages/userinfo/userinfo" :show-extra-icon="true" :extra-icon="{color: 'orange',size: '25',type: 'contact'} "/>
+			<uni-list-item title="消息" clickable  @click="toOther()" :show-extra-icon="true" :extra-icon="{color: 'green',size: '25',type: 'chat'} " showArrow/>
+			<uni-list-item title="意见反馈" clickable  @click="toOther()" :show-extra-icon="true" :extra-icon="{color: 'purple',size: '25',type: 'compose'} " showArrow/>
+			<uni-list-item title="二维码" clickable  @click="toOther()" :show-extra-icon="true" :extra-icon="{color: '#009300',size: '25',type: 'pyq'} " showArrow/>
+			<uni-list-item title="设置" clickable  @click="toOther()" :show-extra-icon="true" :extra-icon="{color: '#000000',size: '25',type: 'gear'} " showArrow/>
+			<uni-list-item title="版本号" clickable  @click="toOther()" :show-extra-icon="true" :extra-icon="{color: '#bf0000',size: '25',type: 'info'} " :rightText="version_text"/>
+			<uni-list-item title="注销" clickable  @click="toLogout()" :show-extra-icon="true" :extra-icon="{color: '#55aaff',size: '25',type: 'info'} " rightText="点击注销"/>
 		</uni-list>
 	</view>
 </template>
@@ -58,6 +59,7 @@ let user_default_image = ref("/static/default_user_head.jpg")
 let version_text = ref(getApp().globalData.version)
 // 用户信息
 let userInfo = ref(getApp().globalData.userInfo)
+let userName = ref(getApp().globalData.userName)
 let userId = ref(getApp().globalData.userId)
 
 //监听userInfo
@@ -71,11 +73,17 @@ let extraIcon = ref({
 	type: 'star'
 })
 
-
 // onMounted生命周期
 onMounted(() => {
 	
 })
+
+function toOther(){
+	uni.showToast({
+		title: '正在开发中，敬请期待',
+		icon:"none",
+	})
+}
 
 function toLogout(){
 	console.log("注销....")

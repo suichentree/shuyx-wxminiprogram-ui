@@ -12,7 +12,7 @@
 		},
 		// 应用启动/刷新时执行（核心：恢复 globalData）
 		onLaunch: function() {
-			console.log("App Launch 应用启动/刷新，开始恢复全局数据");
+			console.log("App Launch 应用启动/刷新，开始加载本地缓存数据到全局数据中....");
 			
 			try {
 				// 1. 读取持久化数据（敏感数据可在此处解密）
