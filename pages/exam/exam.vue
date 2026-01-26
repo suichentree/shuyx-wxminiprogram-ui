@@ -125,7 +125,7 @@ function getExamList(){
 //进行顺序练习
 function toPractice(id){
 	uni.navigateTo({
-		url: '/pages/exam/practice/practiceInfo?examId='+id
+		url: '/pages/exam/sequencePractice/sequencePracticeInfo?examId='+id
 	})
 }
 

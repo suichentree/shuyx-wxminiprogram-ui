@@ -3,25 +3,26 @@
     <!-- 介绍区域卡片 -->
     <view class="card intro-card">
       <text class="card-title">介绍</text>
+      <!-- 核心：用flex布局分离文本和按钮，解决拥挤 -->
       <view class="intro-content">
-        <view class="intro-text">
+        <view class="intro-text"> <!-- 新增文本容器，包裹名称和规则 -->
           <text class="exam-name">{{ exam_info.name }}</text>
+          <!-- 新增顺序练习规则介绍 -->
           <text class="intro-rule">
-            模拟考试规则：系统将根据考试大纲随机抽取100道题目，抽题优先级为高频考点>重点难点>普通知识点。
-            考试过程中需完成全部题目，不可中途退出。提交后将即时生成考试结果及错题分析，
-            帮助您全面了解知识掌握情况。
+            顺序练习规则：按题目顺序依次作答，覆盖全部题库内容，不随机抽题。每答完一题可即时查看解析，练习过程可暂停，完成后生成详细错题记录。
           </text>
         </view>
-        <button type="primary" @click="toStart" class="start-btn">开始考试</button>
+        <button type="primary" @click="toStart" class="start-btn">开始练习</button>
       </view>
     </view>
 
     <!-- 历史记录区域卡片 -->
+    <!-- 以下内容不变 -->
     <view class="card history-card">
       <text class="card-title">历史记录</text>
       <!-- 空状态 -->
       <view v-if="history_list.length === 0" class="empty-history">
-        <text class="empty-text">📝 暂无考试记录，快去完成第一次模拟考试吧～</text>
+        <text class="empty-text">📝 暂无练习记录，快去开始第一次练习吧～</text>
       </view>
       <!-- 历史记录列表 -->
       <view v-else class="history-list">
@@ -29,20 +30,23 @@
           v-for="(item, index) in history_list" 
           :key="item.id"
           class="history-item"
-          @click="viewResult(item)"
+          @click="viewResult(item.id)"
         >
           <!-- 左侧文本区域 -->
           <view class="history-left">
             <text class="history-exam-name">{{ exam_info.name }}</text>
             <view class="history-stats">
-              <text class="stat-item">正确率：<text class="num accuracy-num">{{ getAccuracy(item) }}%</text></text>
+              <text class="stat-item">已答：<text class="num answered-num">{{ item.answered_count }}</text></text>
+              <text class="stat-divider">|</text>
+              <text class="stat-item">未答：<text class="num unanswered-num">{{ item.unanswered_count }}</text></text>
               <text class="stat-divider">|</text>
               <text class="stat-item">完成时间：<text class="finish-time">{{ item.finish_time || '未完成' }}</text></text>
             </view>
           </view>
-          <!-- 右侧查看详情 -->
+          <!-- 右侧正确率 -->
           <view class="history-right">
-            <text class="view-detail">查看详情</text>
+            <text class="accuracy-label">正确率</text>
+            <text class="accuracy-num">{{ item.accuracy || 0 }}%</text>
           </view>
         </view>
       </view>
@@ -52,86 +56,63 @@
 
 <script setup>
 import { onMounted, ref } from 'vue';
-import kaoshiAPIService from '@/api/kaoshi.service.js'
+import spAPIService from '@/api/sequence_practice.service.js'
 import { onLoad } from "@dcloudio/uni-app";
 
-//用户id
-let userId = ref(getApp().globalData.userId)
-userId.value = 999
+let userId = ref(getApp().globalData.userId || 999);
+let examId = ref(null);
 
-//测试id
-let examId = ref(null)
-//获取上一个页面传递的参数
 onLoad((option) => {
   examId.value = option.examId;
 });
 
-onMounted(()=>{
-  history()
-})
+onMounted(() => {
+  history();
+});
 
-// 历史列表
-let history_list = ref([])
-// 模拟考试信息
+let history_list = ref([]);
 let exam_info = ref({
-  name:null,
-  id:null,
-  tag:null
-})
+  name: '特种作业人员-高处作业-登高架设作业(初训)(常考题)',
+  id: null,
+  tag: null
+});
 
-//获取模拟考试历史记录
-function history(){
-  let params = {user_id:userId.value,exam_id:examId.value}
-  kaoshiAPIService.history(params).then((res) => {
-    console.log(res)
+function history() {
+  let params = { user_id: userId.value, exam_id: examId.value };
+  spAPIService.history(params).then((res) => {
     if (res.code == 200) {
-      history_list.value = res.data.user_exam_history
-      exam_info.value = res.data.exam_info
+      history_list.value = res.data.user_exam_history;
+      exam_info.value = res.data.exam_info;
     }
-  })
+  });
 }
 
-let userExamId = ref(null)
-function toStart(){
-  //调用接口，开始/继续模拟考试
-  let params = {user_id:userId.value,exam_id:examId.value}
-  kaoshiAPIService.start(params).then((res) => {
-    console.log(res)
+let userExamId = ref(null);
+function toStart() {
+  let params = { user_id: userId.value, exam_id: examId.value };
+  spAPIService.start(params).then((res) => {
     if (res.code == 200) {
-      userExamId.value = res.data.user_exam_id
-      //跳转到练习页面
+      userExamId.value = res.data.user_exam_id;
       uni.navigateTo({
-        url: '/pages/exam/kaoshi/kaoshi?userExamId='+userExamId.value
-      })
-    }else{
+        url: '/pages/exam/sequencePractice/sequencePractice?userExamId=' + userExamId.value
+      });
+    } else {
       uni.showToast({
         title: '请求失败',
         icon: 'none',
         duration: 2000
-      })
+      });
     }
-  })
+  });
 }
 
-// 计算正确率（容错处理：避免0/0或null的情况）
-function getAccuracy(item) {
-  const correct = Number(item.correct_count) || 0
-  const total = Number(item.total_count) || 0
-  if (total === 0) return '0.0'
-  return (correct / total * 100).toFixed(1)
-}
-
-// 跳转到结果页
-function viewResult(item) {
-  if (item.finish_time == null) {
-    uni.showToast({ title: '考试未完成', icon: 'none' })
-    return
-  }
+function viewResult(userExamId) {
   uni.navigateTo({
-    url: `/pages/exam/kaoshi/kaoshiResult?userExamId=${item.id}`
-  })
+    url: '/pages/exam/sequencePractice/sequencePracticeResult?userExamId=' + userExamId
+  });
 }
 </script>
+
 <style scoped>
 /* 页面全局容器 */
 .page-container {
@@ -162,12 +143,12 @@ function viewResult(item) {
 .intro-content {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: flex-start; /* 改为顶部对齐，避免文本过长时按钮位置偏移 */
   flex-wrap: wrap;
   gap: 16rpx;
 }
 
-/* 文本容器 */
+/* 新增：文本容器，让名称和规则上下排列 */
 .intro-text {
   flex: 1;
   min-width: 0; /* 解决flex子元素文本溢出问题 */
@@ -178,11 +159,11 @@ function viewResult(item) {
   font-size: 28rpx;
   color: #333333;
   line-height: 1.5;
-  display: block;
-  margin-bottom: 12rpx;
+  display: block; /* 改为块级元素，让规则在下方显示 */
+  margin-bottom: 12rpx; /* 与规则保持间距 */
 }
 
-/* 规则介绍样式 */
+/* 新增：规则介绍样式 */
 .intro-rule {
   font-size: 24rpx;
   color: #666666;
@@ -190,7 +171,7 @@ function viewResult(item) {
   display: block;
 }
 
-/* 开始考试按钮 */
+/* 开始练习按钮 */
 .start-btn {
   min-width: 140rpx;
   height: 60rpx;
@@ -200,10 +181,10 @@ function viewResult(item) {
   font-size: 26rpx;
   background-color: #1677ff;
   border: none;
-  margin-top: 4rpx;
+  margin-top: 4rpx; /* 微调按钮位置，与文本顶部对齐 */
 }
 
-/* 空状态样式 */
+/* 以下样式不变 */
 .empty-history {
   padding: 40rpx 0;
   text-align: center;
@@ -213,7 +194,6 @@ function viewResult(item) {
   color: #999999;
 }
 
-/* 历史记录列表 */
 .history-list {
   margin-top: 10rpx;
 }
@@ -255,8 +235,11 @@ function viewResult(item) {
   font-size: 28rpx;
   margin-left: 4rpx;
 }
-.accuracy-num {
-  color: #1677ff;
+.answered-num {
+  color: #008000;
+}
+.unanswered-num {
+  color: #ff4500;
 }
 
 .stat-divider {
@@ -271,8 +254,15 @@ function viewResult(item) {
   min-width: 100rpx;
   text-align: center;
 }
-.view-detail {
-  font-size: 26rpx;
+.accuracy-label {
+  font-size: 24rpx;
+  color: #666666;
+  display: block;
+  margin-bottom: 4rpx;
+}
+.accuracy-num {
+  font-size: 32rpx;
+  font-weight: 700;
   color: #1677ff;
 }
 </style>

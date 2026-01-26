@@ -83,7 +83,7 @@
 		
 		<!-- 底部按钮区域 -->
 		<view class="footer">
-			<button style="flex:1;" @click="openAnswerCard">答题卡</button>
+			<button style="flex:2;" @click="openAnswerCard">答题卡</button>
 			<button style="flex:3;" v-if="isFinished"  @click="toResult">分析结果</button>
 			<button style="flex:3;" type="primary" v-else :disabled="hasSubmitted" @click="submitAnswer">提交答案</button>
 		</view>
@@ -525,15 +525,20 @@ function isWrong(item) {
 	  transition: all 0.2s ease;
 	  border: none;
 }
+.sub-btn {
+	background: linear-gradient(135deg, #409eff 0%, #53a8ff 100%);
+	color: white;
+	box-shadow: 0 4rpx 12rpx rgba(64, 158, 255, 0.2);
+}
 .prev-btn {
 	background-color: #ffffff;
 	color: #606266;
 	box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
 }
 .next-btn {
-	background: linear-gradient(135deg, #409eff 0%, #53a8ff 100%);
-	color: white;
-	box-shadow: 0 4rpx 12rpx rgba(64, 158, 255, 0.2);
+	background-color: #ffffff;
+	color: #606266;
+	box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
 }
 .nav-btn:disabled {
 	opacity: 0.5;
@@ -682,23 +687,6 @@ function isWrong(item) {
 }
 ::v-deep .uni-data-checkbox__item:hover {
   background-color: #f1f5f9; /* 悬停背景色 */
-}
-
-/* 按钮美化 */
-.nav-btn {
-  width: 80%;
-  height: 92rpx;
-  line-height: 92rpx;
-  border-radius: 12rpx; /* 更圆润的边角 */
-  font-size: 32rpx;
-  transition: all 0.3s ease;
-}
-.next-btn {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); /* 更饱和的蓝色 */
-}
-.next-btn:active:not(:disabled) {
-  transform: scale(0.98);
-  box-shadow: 0 2rpx 8rpx rgba(37, 99, 235, 0.3);
 }
 
 /* 答题卡美化 */

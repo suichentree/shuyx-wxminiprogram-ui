@@ -3,10 +3,10 @@ import request from './request.js'
 
 // 创建资源访问对象
 const APIResources = {
-	//开始/继续模拟考试 
+	//开始/继续 
 	start(params) {
 		return request({
-			url: '/mp/exam/practice/start',
+			url: '/mp/exam/sequence/practice/start',
 			method: 'POST',
 			data: params,
 	        header: {"Content-Type":"application/json;charset=UTF-8"} 
@@ -15,24 +15,25 @@ const APIResources = {
 	//获取题目
 	getQuestion(params) {
 		return request({
-			url: '/mp/exam/practice/getQuestion',
+			url: '/mp/exam/sequence/practice/getQuestion',
 			method: 'POST',
 			data: params,
 	        header: {"Content-Type":"application/json;charset=UTF-8"} 
 		})
 	},
+	//获取答题卡信息
 	getAnswerCardInfo(params) {
 		return request({
-			url: '/mp/exam/practice/getAnswerCardInfo',
+			url: '/mp/exam/sequence/practice/getAnswerCardInfo',
 			method: 'POST',
 			data: params,
 	        header: {"Content-Type":"application/json;charset=UTF-8"} 
 		})
 	},
-	//获取模拟考试记录
+	//获取历史记录
 	history(params) {
 		return request({
-			url: '/mp/exam/practice/history',
+			url: '/mp/exam/sequence/practice/history',
 			method: 'POST',
 			data: params,
 	        header: {"Content-Type":"application/json;charset=UTF-8"} 
@@ -41,7 +42,7 @@ const APIResources = {
 	//交卷
 	submitAnswer(params){
 		return request({
-			url: '/mp/exam/practice/submitAnswer',
+			url: '/mp/exam/sequence/practice/submitAnswer',
 			method: 'POST',
 			data: params,
 		    header: {"Content-Type":"application/json;charset=UTF-8"} 
@@ -50,7 +51,7 @@ const APIResources = {
 	//获取结果
 	practiceResult(params){
 		return request({
-			url: '/mp/exam/practice/practiceResult',
+			url: '/mp/exam/sequence/practice/practiceResult',
 			method: 'POST',
 			data: params,
 		    header: {"Content-Type":"application/json;charset=UTF-8"} 

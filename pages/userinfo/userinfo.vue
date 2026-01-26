@@ -15,21 +15,21 @@
 			<uni-list-item title="性别"  :show-extra-icon="true" :extra-icon="{color: 'gray',size: '25',type: 'wallet'}" showArrow>
 				<template v-slot:footer>
 					<picker mode="selector" :value="gender_index" :range="genderArray" range-key="label" @change="bindGenderChange">
-						<view class="uni-input">{{genderArray[gender_index].label}}</view>
+						<view class="uni-input">{{gender_text}}</view>
 					</picker>
 				</template>
 			</uni-list-item>
 			<uni-list-item title="年龄"  clickable  :show-extra-icon="true" :extra-icon="{color: 'purple',size: '25',type: 'compose'}" showArrow>
 				<template v-slot:footer>
 					<picker mode="selector" :value="age_index" :range="ageArray" @change="bindAgeChange">
-						<view class="uni-input">{{ageArray[age_index]}}</view>
+						<view class="uni-input">{{age_text}}</view>
 					</picker>
 				</template>
 			</uni-list-item>
 			<uni-list-item title="地址" :show-extra-icon="true" :extra-icon="{color: '#009300',size: '25',type: 'pyq'} " showArrow>
 				<template v-slot:footer>
 					<picker mode="region" :value="address_value"  @change="bindAddressChange">
-						<view class="uni-input">{{address_value[0]}} - {{address_value[1]}} - {{address_value[2]}}</view>
+						<view class="uni-input">{{address_text}}</view>
 					</picker>
 				</template>
 			</uni-list-item>
@@ -122,24 +122,29 @@ function dialogInputConfirm1(val) {
 //性别选择器
 let gender_index = ref(0)
 let genderArray = ref([{"label":"暂无","value":0},{"label":"男","value":1},{"label":"女","value":2}])
+let gender_text = ref(genderArray.value[gender_index.value].label)
 function bindGenderChange(e){
 	console.log('picker发送选择改变，携带值为', e.detail.value)
 	gender_index.value = e.detail.value
 }
 
-//年龄选择器
+//年龄选择器（年龄在10-70）
 let age_index = ref(0)
-let ageArray = ref([10,15,20,25,30,35,40,45,50,55,60,65,70])
+let ageArray = ref([...Array(61).keys()].map(i => i + 10))
+let age_text = ref(ageArray.value[age_index.value])
 function bindAgeChange(e) {
 	age_index.value = e.detail.value
 }
 
 //地址选择器
 let address_value = ref(['北京市', '北京市', '东城区'])
+let address_text = ref(address_value.value[0] + '-' + address_value.value[1] + '-' + address_value.value[2])
 function bindAddressChange(e){
 	console.log(e.detail.value)
 	address_value.value = e.detail.value
 }
+
+
 
 //电话输入框
 let phone_value = ref(undefined)

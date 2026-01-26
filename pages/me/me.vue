@@ -165,7 +165,7 @@ function wxLogin(){
 		align-items: center;
 	}
 	.gif_wave{
-		height: 60px;
+		height: 35px;
 		width: 100%;
 		z-index: 999;
 		mix-blend-mode: screen;   /* 重要属性，会将gif图的背景色与父元素背景色进行混合*/

@@ -10,6 +10,14 @@ const APIResources = {
 			data: params,
 	        header: {"Content-Type":"application/json;charset=UTF-8"} 
 		})
+	},
+	saveUserInfo (params) {
+		return request({
+			url: '/mp/user/saveUserInfo',
+			method: 'POST',
+			data: params,
+	        header: {"Content-Type":"application/json;charset=UTF-8"} 
+		})
 	}
 }
  

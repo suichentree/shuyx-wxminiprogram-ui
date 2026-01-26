@@ -25,19 +25,19 @@
 			}
 		},
 		{
-			"path": "pages/exam/practice/practiceInfo",
+			"path": "pages/exam/sequencePractice/sequencePracticeInfo",
 			"style": {
 				"navigationBarTitleText": "顺序练习介绍"
 			}
 		},
 		{
-			"path": "pages/exam/practice/practice",
+			"path": "pages/exam/sequencePractice/sequencePractice",
 			"style": {
 				"navigationBarTitleText": "顺序练习"
 			}
 		},
 		{
-			"path": "pages/exam/practice/practiceResult",
+			"path": "pages/exam/sequencePractice/sequencePracticeResult",
 			"style": {
 				"navigationBarTitleText": "顺序练习结果页面"
 			}

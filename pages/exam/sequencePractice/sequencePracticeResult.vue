@@ -72,7 +72,7 @@
 
 <script setup>
 import { onMounted, ref } from 'vue';
-import practiceAPIService from '@/api/practice.service.js'
+import spAPIService from '@/api/sequence_practice.service.js'
 import { onLoad } from "@dcloudio/uni-app";
 
 //用户id
@@ -98,7 +98,7 @@ let question_detail_list = ref([]) // 题目详情列表
 
 function practiceResult(){
 	let params = {user_id:userId.value,user_exam_id:userExamId.value}
-	practiceAPIService.practiceResult(params).then((res) => {
+	spAPIService.practiceResult(params).then((res) => {
 		console.log(res)
 		if(res.code == 200){
 			exam_name.value = res.data.exam_name
