@@ -6,7 +6,7 @@ const APIResources = {
 	//获取题目
 	getQuestion(params) {
 		return request({
-			url: '/mp/exam/error/practice/getQuestion',
+			url: '/mp/exam/random/practice/getQuestion',
 			method: 'POST',
 			data: params,
 	        header: {"Content-Type":"application/json;charset=UTF-8"} 

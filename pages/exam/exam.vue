@@ -43,7 +43,8 @@
         
         <!-- 练习按钮区域 -->
         <view class="exam-card__btns">
-          <button class="btn-item practice" @click="toPractice(exam.id)">顺序练习</button>
+          <button class="btn-item practice" @click="toSequencePractice(exam.id)">顺序练习</button>
+		  <button class="btn-item practice" @click="toRandomPractice(exam.id)">随机练习</button>
           <button class="btn-item exam" @click="toKaoshi(exam.id)">模拟考试</button>
           <button class="btn-item error" @click="toErrorPractice(exam.id)">错题练习</button>
         </view>
@@ -123,9 +124,15 @@ function getExamList(){
 }
 
 //进行顺序练习
-function toPractice(id){
+function toSequencePractice(id){
 	uni.navigateTo({
 		url: '/pages/exam/sequencePractice/sequencePracticeInfo?examId='+id
+	})
+}
+//随机练习
+function toRandomPractice(id){
+	uni.navigateTo({
+		url: '/pages/exam/randomPractice/randomPractice?examId='+id
 	})
 }
 

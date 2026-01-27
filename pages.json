@@ -71,6 +71,18 @@
 			"style": {
 				"navigationBarTitleText": "错题练习"
 			}
+		},
+		{
+			"path": "pages/exam/randomPractice/randomPractice",
+			"style": {
+				"navigationBarTitleText": "随机练习"
+			}
+		},
+		{
+			"path": "pages/wxPay/wxPay",
+			"style": {
+				"navigationBarTitleText": "微信支付"
+			}
 		}
 	],
 	"globalStyle": {
