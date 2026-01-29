@@ -38,6 +38,7 @@
 			</uni-list-item>
 			<uni-list-item title="个人信息" clickable  link="navigateTo" to="/pages/userinfo/userinfo" :show-extra-icon="true" :extra-icon="{color: 'orange',size: '25',type: 'contact'} "/>
 			<uni-list-item title="消息" clickable  @click="toOther()" :show-extra-icon="true" :extra-icon="{color: 'green',size: '25',type: 'chat'} " showArrow/>
+			<uni-list-item title="商城" clickable  @click="toMall()" :show-extra-icon="true" :extra-icon="{color: 'green',size: '25',type: 'chat'} " showArrow/>
 			<uni-list-item title="微信支付测试" clickable  @click="toWXpay()" :show-extra-icon="true" :extra-icon="{color: 'green',size: '25',type: 'chat'} " showArrow/>
 			<uni-list-item title="意见反馈" clickable  @click="toOther()" :show-extra-icon="true" :extra-icon="{color: 'purple',size: '25',type: 'compose'} " showArrow/>
 			<uni-list-item title="二维码" clickable  @click="toOther()" :show-extra-icon="true" :extra-icon="{color: '#009300',size: '25',type: 'pyq'} " showArrow/>
@@ -92,6 +93,11 @@ function toWXpay(){
 	})
 }
 
+function toMall(){
+	uni.navigateTo({
+		url:'/pages/mall/mall'
+	})
+}
 
 function toLogout(){
 	console.log("注销....")

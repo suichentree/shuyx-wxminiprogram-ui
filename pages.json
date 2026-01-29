@@ -83,6 +83,30 @@
 			"style": {
 				"navigationBarTitleText": "微信支付"
 			}
+		},
+		{
+			"path": "pages/mall/mall",
+			"style": {
+				"navigationBarTitleText": "商城中心"
+			}
+		},
+		{
+			"path": "pages/mall/goodsDetail/goodsDetail",
+			"style": {
+				"navigationBarTitleText": "商品详情"
+			}
+		},
+		{
+			"path": "pages/mall/payment/payment",
+			"style": {
+				"navigationBarTitleText": "支付"
+			}
+		},
+		{
+			"path": "pages/order/order",
+			"style": {
+				"navigationBarTitleText": "订单"
+			}
 		}
 	],
 	"globalStyle": {
