@@ -1,19 +1,19 @@
 <template>
   <view class="payment-container">
     <!-- 商品信息卡片 -->
-    <uni-card class="goods-card">
+    <uni-card class="goods-card" >
       <view class="goods-info">
         <!-- 商品图片 -->
         <image class="goods-img" src="/static/default_user_head.jpg" mode="widthFix"></image>
         <view class="goods-desc">
-          <text class="goods-name">{{ goodsInfo.name }}</text>
-          <text class="goods-price">¥{{ goodsInfo.current_price }}</text>
+          <text class="goods-name">{{ payInfo.name }}</text>
+          <text class="goods-price">¥{{ payInfo.price }}</text>
         </view>
       </view>
     </uni-card>
 
     <!-- 支付方式选择（核心美化区域） -->
-    <uni-card class="pay-type-card">
+    <uni-card class="pay-type-card" >
       <view class="pay-type-title">支付方式</view>
       <view class="pay-type-list">
         <uni-data-checkbox
@@ -25,18 +25,17 @@
         >
           <template v-slot:option="{ option }">
             <!-- 支付方式选项项 -->
-            <view
-              class="option-item"
-              :class="{
+            <view 
+              class="option-item" 
+              :class="{ 
                 active: selectedPayType === option.value,
-                // 关键修改1：从固定判断value=2改为动态判断isDisabled
-                disabled: option.isDisabled
+                disabled: option.value === '2' // 禁用支付宝
               }"
             >
               <!-- 支付方式名称 -->
               <text class="option-text">{{ option.text }}</text>
               <!-- 选中态图标 -->
-              <uni-icon
+              <uni-icon 
                 v-if="selectedPayType === option.value"
                 type="success"
                 color="#00b42a"
@@ -50,11 +49,11 @@
     </uni-card>
 
     <!-- 支付按钮 -->
-    <button
-      type="primary"
-      class="pay-submit-btn"
+    <button 
+      type="primary" 
+      class="pay-submit-btn" 
       @click="submitPayment"
-      :disabled="!selectedPayType || getIsDisabled(selectedPayType)"
+      :disabled="!selectedPayType"
     >
       确认支付
     </button>
@@ -62,88 +61,73 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
-import APIService from '@/api/product.service.js'
-import orderAPIService from '@/api/order.service.js'
+import { ref, onMounted } from 'vue';
 import { onLoad } from "@dcloudio/uni-app";
 
-let userId = ref(null)
-let goodsId = ref(null)
-// 页面加载获取商品参数
-onLoad((options) => {
-	goodsId.value = options.goodsId;
-	userId.value = getApp().globalData.userId
+// 支付信息
+const payInfo = ref({
+  id: '',
+  name: '',
+  price: ''
 });
 
-let goodsInfo = ref({});
-onMounted(() => {
-  // 获取商品详情
-  APIService.getProductDetail({product_id:goodsId.value}).then(res => {
-	  if(res.code == 200){
-	  	goodsInfo.value = res.data;
-	  }else{
-	  	uni.showToast({
-	  		title:"失败",
-	  		icon:None
-	  	})
-	  } 
-  });
-}) 
-
-// 选中的支付方式（默认选第一个可用的支付方式）
-const selectedPayType = ref('');
+// 选中的支付方式（默认微信）
+const selectedPayType = ref('1');
 // 支付方式列表
 const paylist = ref([
-  { value: '1', text: '微信支付', isDisabled: false }, 
-  { value: '2', text: '支付宝支付', isDisabled: true },
-  { value: '3', text: '银行卡支付', isDisabled: false }
+  { value: '1', text: '微信支付',isDisabled:true },
+  { value: '2', text: '支付宝支付',isDisabled:false  },
+  { value: '3', text: '银行卡支付',isDisabled:false  }
 ]);
 
-// 辅助方法：根据value判断是否禁用
-const getIsDisabled = (value) => {
-  const item = paylist.value.find(item => item.value === value);
-  return item ? item.isDisabled : true;
-};
+
+// 页面加载获取支付参数
+onLoad((options) => {
+  payInfo.value = {
+    id: options.goodsId || '',
+    name: options.goodsName || '默认商品',
+    price: options.goodsPrice || '0.00'
+  };
+});
 
 // 支付方式变更处理
-// 关键修改2：从硬编码判断支付宝改为通用的isDisabled判断
 const handlePayTypeChange = (e) => {
   const selectedValue = e.detail.value;
-  const selectedItem = paylist.value.find(item => item.value === selectedValue);
-
-  // 如果选中了禁用的项
-  if (selectedItem && selectedItem.isDisabled) {
+  // 禁用支付宝支付
+  if (selectedValue === '2') {
     uni.showToast({
-      title: `${selectedItem.text}暂不支持使用`,
+      title: '暂不支持支付宝支付',
       icon: 'none',
       duration: 1500
     });
+    selectedPayType.value = '1'; // 切回微信支付
+    return;
   }
+  selectedPayType.value = selectedValue;
 };
 
 // 提交支付
 const submitPayment = () => {
+  if (!selectedPayType.value) return;
+
   // 模拟调起支付
   uni.showLoading({ title: '正在调起支付...' });
   
-  //创建订单信息
-  let productIdArray = []
-  productIdArray.push(goodsId.value)
-  orderAPIService.createOrder({userId:userId.value,productIds:productIdArray}).then(res => {
-	  if(res.code == 200){
-		uni.hideLoading();
-	  	uni.showToast({
-	  		title:"下单成功",
-	  		icon:"success"
-	  	})
-	  }else{
-		uni.hideLoading();
-		uni.showToast({
-			title:res.message,
-			icon:"none"
-		})
-	  }
-  })
+  setTimeout(() => {
+    uni.hideLoading();
+    uni.showToast({
+      title: '支付成功',
+      icon: 'success',
+      duration: 2000
+    });
+
+    // 跳转到已购商品页面
+    setTimeout(() => {
+      uni.navigateTo({
+        url: `/pages/mall/purchasedGoods/purchasedGoods?isPaySuccess=true`
+      });
+    }, 2000);
+  }, 1500);
 };
 </script>
 
@@ -192,6 +176,28 @@ const submitPayment = () => {
   font-weight: 600;
 }
 
+/* 优惠券卡片 */
+.coupon-card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
+}
+.coupon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.coupon-label {
+  font-size: 30rpx;
+  color: #333;
+  font-weight: 500;
+}
+.coupon-select {
+  width: 60%;
+}
+
 /* 支付方式卡片 */
 .pay-type-card {
   background: #fff;
@@ -225,15 +231,21 @@ const submitPayment = () => {
   background-color: #f0f9ff;
   border: 2rpx solid #1677ff;
 }
-/* 禁用态（动态绑定） */
+/* 禁用态（支付宝） */
 .option-item.disabled {
   opacity: 0.6;
-  pointer-events: none; /* 禁止点击 */
-  color: #999;
+  pointer-events: none;
 }
 /* 未选中 hover 态 */
 .option-item:not(.active):not(.disabled):hover {
   background-color: #f8f9fa;
+}
+
+/* 支付图标 */
+.pay-icon {
+  width: 40rpx;
+  height: 40rpx;
+  margin-right: 16rpx;
 }
 
 /* 支付方式文字 */
@@ -241,10 +253,6 @@ const submitPayment = () => {
   font-size: 28rpx;
   color: #333;
   flex: 1;
-}
-/* 禁用项文字颜色 */
-.option-item.disabled .option-text {
-  color: #999;
 }
 
 /* 选中态图标 */
@@ -272,5 +280,9 @@ const submitPayment = () => {
 .pay-submit-btn:disabled {
   background-color: #ccc;
   color: #fff;
+}
+/* 按钮点击反馈 */
+.pay-submit-btn:active {
+  background-color: #d83737;
 }
 </style>

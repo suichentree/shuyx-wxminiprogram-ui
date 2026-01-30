@@ -5,11 +5,11 @@
       <view v-for="(item, index) in goodsList" :key="index" class="goods-item" @click="toGoodsDetail(item)">
         <uni-card :shadow="false">
           <view class="goods-info">
-            <image class="goods-img" :src="item.image" mode="widthFix"></image>
+            <image class="goods-img" src="/static/default_user_head.jpg" mode="widthFix"></image>
             <view class="goods-desc">
               <text class="goods-name">{{ item.name }}</text>
-              <text class="goods-price">¥{{ item.price }}</text>
-              <text class="goods-tag" v-if="item.type === 'vip'">VIP专属</text>
+              <text class="goods-price">现价 ¥{{ item.current_price }}</text>
+              <text class="goods-tag">{{ item.type_name }}</text>
             </view>
           </view>
         </uni-card>
@@ -21,30 +21,33 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import APIService from '@/api/product.service.js'
-import { onLoad } from "@dcloudio/uni-app";
 
-// 激活的标签页
-const activeTab = ref(0);
-// 商品列表（模拟数据）
-const goodsList = ref([
-  {
-    id: 1,
-    name: "2026年行测真题题库（含解析）",
-    price: 99,
-    image: "/static/images/test-1.png",
-    type: "test"
-  },
-  {
-    id: 2,
-    name: "全年VIP会员（所有试题免费看）",
-    price: 299,
-    image: "/static/images/vip-1.png",
-    type: "vip"
-  }
-]);
+// onMounted生命周期
+onMounted(() => {
+	getProductList()
+})
+
+let goodsList = ref([])
+function getProductList() {
+	let params = {
+		type_code:null,
+		page_num: 1,
+		page_size: 10
+	}
+	APIService.getProductList(params).then(res => {
+		if(res.code == 200){
+			goodsList.value = res.data.products
+		}else{
+			uni.showToast({
+				title:"失败",
+				icon:None
+			})
+		}
+	})
+}
 
 // 跳转到商品详情
-const toGoodsDetail = (item) => {
+function toGoodsDetail(item){
   uni.navigateTo({
 	url:"/pages/mall/goodsDetail/goodsDetail?goodsId="+item.id
   })

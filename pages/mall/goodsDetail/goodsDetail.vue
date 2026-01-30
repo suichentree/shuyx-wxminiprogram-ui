@@ -3,10 +3,10 @@
     <!-- 商品信息 -->
     <uni-card>
       <view class="goods-base">
-        <image class="goods-big-img" :src="goodsInfo.image" mode="widthFix"></image>
+        <image class="goods-big-img" src="/static/default_user_head.jpg" mode="widthFix"></image>
         <text class="goods-title">{{ goodsInfo.name }}</text>
-        <text class="goods-price">¥{{ goodsInfo.price }}</text>
-        <text class="goods-intro">{{ goodsInfo.intro }}</text>
+        <text class="goods-price">¥{{ goodsInfo.current_price }}</text>
+        <text class="goods-intro">{{ goodsInfo.description }}</text>
       </view>
     </uni-card>
 
@@ -17,35 +17,33 @@
 
 <script setup>
 import { onMounted, ref } from 'vue';
-import APIService from '@/api/sequence_practice.service.js'
+import APIService from '@/api/product.service.js'
 import { onLoad } from "@dcloudio/uni-app";
 
-const goodsInfo = ref({
-  id: '1',
-  name: '1111111',
-  price: '11',
-  image: '/static/images/vip-1.png',
-  intro: '真题题库含完整解析，支持在线做题、错题收藏'
-});
-
-const goods_id = ref(null)
+let goodsId = ref(null)
 // 页面加载获取商品参数
 onLoad((options) => {
-	goods_id.value = options.goodsId;
-	
-	//获取具体商品信息
-  
+	goodsId.value = options.goodsId;
 });
 
-// 返回上一页
-const goBack = () => {
-  uni.navigateBack();
-};
+let goodsInfo = ref({});
+onMounted(() => {
+  // 获取商品详情
+  APIService.getProductDetail({product_id:goodsId.value}).then(res => {
+	  if(res.code == 200){
+	  	goodsInfo.value = res.data;
+	  }else{
+	  	uni.showToast({
+	  		title:"失败",
+	  		icon:None
+	  	})
+	  } 
+  });
+}) 
 
-// 跳转到支付页面
-const toPayment = () => {
+function toPayment (){
 	uni.navigateTo({
-		url: "/pages/mall/payment/payment?goodsId="+goodsInfo.value.id
+		url: "/pages/mall/payment/payment?goodsId="+goodsId.value
 	})
 };
 </script>
