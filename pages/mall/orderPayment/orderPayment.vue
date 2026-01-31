@@ -124,7 +124,7 @@ const handlePayTypeChange = (e) => {
 // 提交支付
 const submitPayment = () => {
   // 模拟调起支付
-  uni.showLoading({ title: '正在调起支付...' });
+  uni.showLoading({ title: '开始创建订单，并调起支付...' });
   
   //创建订单信息
   let productIdArray = []
@@ -132,6 +132,9 @@ const submitPayment = () => {
   orderAPIService.createOrder({userId:userId.value,productIds:productIdArray}).then(res => {
 	  if(res.code == 200){
 		uni.hideLoading();
+		
+		//调用微信下单接口，跳转到微信支付页面
+		
 	  	uni.showToast({
 	  		title:"下单成功",
 	  		icon:"success"

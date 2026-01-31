@@ -43,7 +43,7 @@ onMounted(() => {
 
 function toPayment (){
 	uni.navigateTo({
-		url: "/pages/mall/payment/payment?goodsId="+goodsId.value
+		url: "/pages/mall/orderPayment/orderPayment?goodsId="+goodsId.value
 	})
 };
 </script>

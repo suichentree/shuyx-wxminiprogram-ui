@@ -97,15 +97,15 @@
 			}
 		},
 		{
-			"path": "pages/mall/payment/payment",
+			"path": "pages/mall/orderPayment/orderPayment",
 			"style": {
-				"navigationBarTitleText": "支付"
+				"navigationBarTitleText": "订单支付"
 			}
 		},
 		{
-			"path": "pages/order/order",
+			"path": "pages/mall/order/order",
 			"style": {
-				"navigationBarTitleText": "订单"
+				"navigationBarTitleText": "我的订单"
 			}
 		}
 	],
